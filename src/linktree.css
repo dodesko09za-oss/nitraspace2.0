@@ -6,6 +6,7 @@ body{min-height:100svh}
 .linktree-atmosphere:after{position:absolute;inset:0;content:"";background:linear-gradient(180deg,#05060755,#050607d9 74%,#050607)}
 .linktree-atmosphere img{position:absolute;top:50%;left:50%;width:min(900px,150vw);opacity:.52;filter:grayscale(1) brightness(1.35) contrast(1.08);transform:translate(-50%,-48%);animation:linktree-drift 24s ease-in-out infinite alternate}
 .linktree-content{width:min(100%,470px);text-align:center;animation:linktree-arrive .8s cubic-bezier(.2,.8,.2,1) both}
+.linktree-mark{display:block;width:48px;height:48px;object-fit:contain;margin:0 auto 13px;filter:drop-shadow(0 0 7px #e9f4ffb3) drop-shadow(0 0 21px #c8d9ff70)}
 .linktree-wordmark{display:inline-grid;color:#f7f8fa;font:400 38px/.77 Anton,Impact,sans-serif;letter-spacing:-.035em;text-decoration:none;text-align:left;text-shadow:0 1px #8d969d,0 0 22px #fff2}
 .linktree-kicker{margin:28px 0 14px;color:#b9c1c9;font-size:10px;font-weight:600;letter-spacing:.3em}
 .linktree h1{margin:0;font:400 clamp(53px,14vw,86px)/.94 Anton,Impact,sans-serif;letter-spacing:-.025em;text-shadow:0 2px #70777d,0 0 24px #fff1}
