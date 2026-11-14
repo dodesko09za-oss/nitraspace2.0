@@ -86,6 +86,9 @@ async function matchingImage(file){
   return blob
 }
 async function account(){
+  const hashParams=new URLSearchParams(location.hash.replace(/^#/,''))
+  const recoveryRequested=new URLSearchParams(location.search).get('recovery')==='1'||hashParams.get('type')==='recovery'
+  if(recoveryRequested)return passwordRecoveryForm()
   if(!state.user)return authForm(/#signup(?:\/|$)/i.test(location.hash))
   const [profileResult,blocked]=await Promise.all([
     db.from('profiles').select('id,username,display_name,bio,avatar_path,discoverable,people_interests').eq('id',state.user.id).single(),
@@ -105,6 +108,25 @@ content(`<section class="account-heading"><span>NITRA SPACE / NASTAVENIA</span><
     await signOut()
   }
   document.querySelectorAll('[data-unblock]').forEach(b=>b.onclick=async()=>{const {error}=await db.rpc('unblock_user',{p_blocked:b.dataset.unblock});if(error)notice(error.message);else account()})
+}
+function passwordRecoveryForm(){
+ content(`<section class="panel auth-form"><span>NITRA SPACE / ZABEZPEČENIE</span><h1>Nastav nové heslo.</h1><p class="muted">Vyber si nové heslo pre svoj účet.</p><form data-new-password><label>Nové heslo<input name="password" type="password" required minlength="6" autocomplete="new-password"></label><label>Zopakuj nové heslo<input name="confirmPassword" type="password" required minlength="6" autocomplete="new-password"></label><p class="form-message" role="alert"></p><button type="submit">Uložiť nové heslo →</button></form><a href="/account" data-route>Späť na prihlásenie</a></section>`)
+ const form=document.querySelector('[data-new-password]')
+ form.onsubmit=async event=>{
+  event.preventDefault()
+  const button=form.querySelector('[type="submit"]'),message=form.querySelector('.form-message')
+  const password=form.elements.password.value
+  if(password!==form.elements.confirmPassword.value){message.textContent='Heslá sa nezhodujú.';return}
+  button.disabled=true;message.textContent=''
+  try{
+   const {data,error}=await db.auth.updateUser({password})
+   if(error)throw error
+   state.user=data.user
+   history.replaceState(null,'',location.pathname)
+   notice('Heslo bolo úspešne zmenené.')
+   await account()
+  }catch(error){message.textContent=error.message||'Heslo sa nepodarilo zmeniť.';button.disabled=false}
+ }
 }
 function authForm(signup=false){
  content(`<section class="panel auth-form"><span>NITRA SPACE / ÚČET</span><h1>${signup?'Vytvor si účet.':'Vitaj späť.'}</h1><form data-supa-auth><label>E-mail<input name="email" type="email" required autocomplete="email"></label><label>Heslo<input name="password" type="password" required minlength="6" autocomplete="${signup?'new-password':'current-password'}"></label><p class="form-message" role="alert"></p><button type="submit">${signup?'Zaregistrovať sa':'Prihlásiť sa'} →</button></form><button type="button" data-auth-switch>${signup?'Už mám účet':'Vytvoriť účet'}</button><button type="button" data-reset-password>Zabudol som heslo</button></section>`)
