@@ -6,8 +6,8 @@ Anonymný textový chat pre Nitra Space. Frontend používa Vite + JavaScript + 
 
 - žiadna registrácia ani Supabase Auth
 - anonymné session ID uložené iba v `localStorage`
-- párovanie cez `public.find_chat_partner(uuid)`
-- ukončenie miestnosti cez `public.close_chat_room(uuid)`
+- párovanie cez Supabase Realtime Presence v spoločnom čakacom kanáli
+- miestnosť chatu vzniká z dvojice anonymných session ID a končí odpojením kanála
 - správy sa neposielajú do vlastnej databázovej tabuľky
 - textové správy idú cez Supabase Realtime Broadcast
 - Presence sa používa na zachytenie odchodu partnera
@@ -79,19 +79,13 @@ Po zmene environment variables sprav nový deploy.
 
 Projekt musí mať existujúce:
 
-- `public.chat_rooms`
-- `public.chat_participants`
-- `public.find_chat_partner(uuid)`
-- `public.close_chat_room(uuid)`
-- `public.cleanup_old_chat_rooms()`
+- Supabase Realtime Broadcast a Presence musia byť dostupné pre verejné kanály.
 
 Realtime Broadcast musí byť povolený.
 
 ### Bezpečnosť
 
-Pri anonymnom klientovi je dôležité, aby klient nemal priame INSERT/UPDATE/DELETE oprávnenia na chatové tabuľky. Párovanie a zatváranie má robiť iba serverová funkcia (`SECURITY DEFINER`) s bezpečne nastaveným `search_path`.
-
-`cleanup_old_chat_rooms()` nemá byť volateľná z verejného klienta.
+Anonymný chat používa Realtime Presence a Broadcast; správy sa nezapisujú do tabuliek. Verejný Presence kanál obsahuje len náhodné session ID a stav čakania, bez profilových alebo osobných údajov.
 
 ## Social databáza
 

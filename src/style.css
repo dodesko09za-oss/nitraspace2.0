@@ -127,11 +127,11 @@ body.modal-open { overflow:hidden }
 
 /* Embedded Aura theme used only inside the redesign preview. */
 html.aura-embed {
-  --page:#f2f0eb; --surface:#f8f7f3; --soft:#ebe9e3; --text:#11110f;
-  --muted:#6f6d67; --faint:#8c8981; --line:rgba(17,17,15,.14);
-  --button:#11110f; --button-text:#f2f0eb; --hover:#272723; --blue:#2455ff;
-  --bubble-mine:#2455ff; --bubble-mine-text:#fff; --bubble-theirs:#e8e6df;
-  font-family:"DM Sans",-apple-system,BlinkMacSystemFont,sans-serif;
+  --page:#000; --surface:#090a0b; --soft:#121416; --text:#f5f6f7;
+  --muted:#a2a8ae; --faint:#737b83; --line:rgba(255,255,255,.16);
+  --button:#f5f6f7; --button-text:#050607; --hover:#d7dce0; --blue:#008cff;
+  --bubble-mine:#17334a; --bubble-mine-text:#fff; --bubble-theirs:#111416;
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 }
 html.aura-embed[data-theme="dark"] {
   --page:#0b0b0a; --surface:#131311; --soft:#1b1b18; --text:#f2f0e9;
@@ -146,17 +146,31 @@ html.aura-embed .home-card::before { content:"02 / SPOZNÁVANIE"; display:block;
 html.aura-embed .home-card h1 { font-size:clamp(46px,7vw,92px); font-weight:700; line-height:.92; letter-spacing:-.07em }
 html.aura-embed .home-lead { margin:24px auto 34px; color:var(--muted) }
 html.aura-embed .start-btn { min-height:58px; border-radius:999px; box-shadow:0 14px 34px rgba(17,17,15,.14) }
-html.aura-embed .chat-page { background:var(--page) }
-html.aura-embed .chat-header { min-height:70px; padding:10px clamp(18px,4vw,42px); background:color-mix(in srgb,var(--surface) 86%,transparent); backdrop-filter:blur(18px) }
-html.aura-embed .brand-home strong { font-size:13px; font-weight:800; letter-spacing:.08em; text-transform:uppercase }
-html.aura-embed .chat-window { width:min(100%,1180px); padding:14px clamp(12px,3vw,30px) 18px }
-html.aura-embed .status-row { min-height:34px; width:fit-content; padding:7px 12px; border-radius:999px; font-size:11px }
-html.aura-embed .transcript { padding:clamp(16px,3vw,32px); border-radius:26px; background:radial-gradient(circle at 80% 20%,rgba(36,85,255,.08),transparent 34%),var(--surface) }
-html.aura-embed .message-bubble { padding:12px 15px; border-radius:20px }
-html.aura-embed .controls { grid-template-columns:96px minmax(0,1fr) 84px; gap:9px }
-html.aura-embed .next-btn,html.aura-embed .leave-btn,html.aura-embed .send-btn,html.aura-embed .composer textarea { min-height:54px; border-radius:18px }
-html.aura-embed .next-btn { color:#11110f; background:#d9ff43 }
-html.aura-embed .send-btn { background:var(--blue) }
+html.aura-embed .chat-page { background:radial-gradient(ellipse at 50% 0%,rgba(0,140,255,.075),transparent 52%),#000 }
+html.aura-embed .chat-header { display:none }
+html.aura-embed .chat-window { width:min(100%,1120px); padding:10px clamp(12px,2vw,24px) 14px; gap:12px }
+html.aura-embed .status-row { min-height:38px; width:100%; display:flex; justify-content:space-between; gap:12px; padding:6px 13px; border:1px solid transparent; border-radius:999px; background:linear-gradient(#090b0d,#090b0d) padding-box,linear-gradient(115deg,#ffffff55,#39434b 50%,#008cff88) border-box; font-size:11px; letter-spacing:.045em; box-shadow:0 6px 22px #0008,inset 0 1px #ffffff12 }
+html.aura-embed .status-main { min-width:0; display:flex; align-items:center; gap:8px }
+html.aura-embed .chat-online-badge { flex:0 0 auto; padding-left:12px; border-left:1px solid rgba(255,255,255,.14); color:#aeb7bf; font-size:10px; letter-spacing:.06em; text-transform:uppercase }
+html.aura-embed .chat-online-badge strong { color:#f4f7f9; font-weight:750 }
+html.aura-embed .chat-online-badge .online-dot { background:#008cff; box-shadow:0 0 10px rgba(0,140,255,.85) }
+html.aura-embed .status-row.connected { color:#b4dcf8 }
+html.aura-embed .status-row.connected .status-dot { background:#008cff; box-shadow:0 0 12px rgba(0,140,255,.9) }
+html.aura-embed .status-row.searching .status-dot { background:#008cff }
+html.aura-embed .transcript { position:relative; flex:1; min-height:0; padding:clamp(16px,3vw,30px); border:1px solid transparent; border-radius:20px; background:linear-gradient(150deg,#0b0d0f,#070809 56%,#0a0c0f) padding-box,linear-gradient(135deg,#ffffff45,#20262c 34%,#008cff62 63%,#ffffff25) border-box; box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 18px 50px rgba(0,0,0,.3) }
+html.aura-embed .message-bubble { padding:12px 16px; border-radius:17px; line-height:1.5; box-shadow:0 5px 18px #0005 }
+html.aura-embed .message-bubble.mine { border:1px solid rgba(201,228,247,.32); background:linear-gradient(145deg,#bfcbd3 0%,#637682 16%,#253d4c 48%,#0d2636 75%,#7695aa 100%); color:#fff; box-shadow:inset 0 1px #ffffff55,0 8px 22px #0008 }
+html.aura-embed .message-bubble.theirs { border:1px solid transparent; background:linear-gradient(145deg,#1a1d20,#101214) padding-box,linear-gradient(135deg,#ffffff3d,#ffffff0c 56%,#75808a55) border-box; color:#f3f5f7 }
+html.aura-embed .controls { grid-template-columns:78px minmax(0,1fr) 76px; gap:9px }
+html.aura-embed .next-btn,html.aura-embed .leave-btn,html.aura-embed .send-btn,html.aura-embed .composer textarea { min-height:50px; border-radius:14px; font-family:inherit; transition:border-color .18s ease,background .18s ease,transform .18s ease,box-shadow .18s ease }
+html.aura-embed .next-btn { border-color:rgba(255,255,255,.18); color:#f5f6f7; background:linear-gradient(145deg,#181a1c,#0d0e10); letter-spacing:.07em }
+html.aura-embed .next-btn:hover { border-color:rgba(0,140,255,.72); background:#111820; box-shadow:0 0 22px rgba(0,140,255,.12) }
+html.aura-embed .leave-btn { border-color:rgba(255,255,255,.14); background:#090a0b; color:#aeb5bb; letter-spacing:.04em }
+html.aura-embed .leave-btn:hover { border-color:rgba(255,255,255,.32); color:#fff }
+html.aura-embed .composer textarea { border-color:rgba(255,255,255,.16); background:#0b0c0e; box-shadow:inset 0 1px 0 rgba(255,255,255,.025) }
+html.aura-embed .composer textarea:focus { border-color:rgba(0,140,255,.8); box-shadow:0 0 0 3px rgba(0,140,255,.12) }
+html.aura-embed .send-btn { border-color:#ffffff77; background:linear-gradient(180deg,#fff 0%,#d9dfe3 35%,#929da5 52%,#f8fafb 67%,#b8c1c7 100%); color:#060809; letter-spacing:.045em; box-shadow:inset 0 1px #ffffff,0 8px 24px #0009 }
+html.aura-embed .send-btn:hover:not(:disabled) { transform:translateY(-1px); box-shadow:inset 0 1px #ffffff,0 10px 28px #8bb5d52e; opacity:1 }
 
 @media (max-width:640px) {
   .site-header { top:max(16px,env(safe-area-inset-top)); padding:0 18px }
@@ -193,6 +207,14 @@ html.aura-embed .send-btn { background:var(--blue) }
   .next-btn,.leave-btn { min-height:39px; border-radius:11px; font-size:12px }
   .composer textarea { height:83px; min-height:83px; max-height:130px; padding:10px; border-radius:11px }
   .send-btn { min-height:83px; border-radius:11px; font-size:12px }
+  html.aura-embed .chat-window { padding:8px 10px calc(10px + env(safe-area-inset-bottom)); gap:9px }
+  html.aura-embed .status-row { min-height:36px; padding:5px 10px; border-radius:14px }
+  html.aura-embed .chat-online-badge { gap:5px; padding-left:8px; font-size:9px }
+  html.aura-embed .transcript { border-radius:16px; padding:14px }
+  html.aura-embed .controls { grid-template-columns:68px minmax(0,1fr); grid-template-areas:"next composer" "leave composer"; gap:5px }
+  html.aura-embed .next-btn,html.aura-embed .leave-btn { min-height:39px; border-radius:11px; font-size:11px }
+  html.aura-embed .composer { grid-template-columns:minmax(0,1fr) 68px; gap:5px }
+  html.aura-embed .composer textarea,html.aura-embed .send-btn { min-height:83px; border-radius:11px }
 }
 @media (max-width:380px) {
   .site-header { padding:0 14px }
@@ -206,3 +228,31 @@ html.aura-embed .send-btn { background:var(--blue) }
 @media (prefers-reduced-motion:reduce) {
   *,*::before,*::after { scroll-behavior:auto!important; transition-duration:.01ms!important; animation-duration:.01ms!important }
 }
+
+/* Neutral full-page embedded chat: keep the site black and remove blue glow treatments. */
+html.aura-embed .chat-page { background:#000 }
+html.aura-embed .chat-window { width:100%; padding:10px clamp(14px,2vw,28px) 14px; gap:10px }
+html.aura-embed .status-row { width:100%; min-height:36px; border:1px solid #ffffff24; border-radius:10px; background:#080808; box-shadow:none; color:#c3c3c3 }
+html.aura-embed .status-row.searching,html.aura-embed .status-row.connected { color:#d0d0d0 }
+html.aura-embed .status-row.searching .status-dot,html.aura-embed .status-row.connected .status-dot { background:#c7c7c7; box-shadow:none }
+html.aura-embed .transcript { border:0; border-radius:0; background:#000; box-shadow:none; padding:clamp(12px,2vw,24px) }
+html.aura-embed .message-bubble.mine { border:1px solid #ffffff38; background:linear-gradient(145deg,#383838,#202020 60%,#151515); color:#fff; box-shadow:none }
+html.aura-embed .message-bubble.theirs { border:1px solid #ffffff20; background:#111; color:#f3f3f3; box-shadow:none }
+html.aura-embed .next-btn { border-color:#ffffff38; background:#111; color:#f2f2f2; box-shadow:none }
+html.aura-embed .next-btn:hover { border-color:#ffffff80; background:#191919; box-shadow:none }
+html.aura-embed .leave-btn { border-color:#ffffff28; background:#080808; color:#b7b7b7 }
+html.aura-embed .composer textarea { border-color:#ffffff30; background:#080808; box-shadow:none }
+html.aura-embed .composer textarea:focus { border-color:#c7c7c7; box-shadow:0 0 0 2px #ffffff16 }
+html.aura-embed .send-btn { border:1px solid #fff; background:linear-gradient(180deg,#fff,#d7d7d7); color:#090909; box-shadow:none }
+html.aura-embed .send-btn:hover:not(:disabled) { box-shadow:0 4px 16px #ffffff20 }
+html.aura-embed,html.aura-embed body,html.aura-embed button,html.aura-embed textarea { font-family:Anton,Impact,sans-serif }
+html.aura-embed .status-row,html.aura-embed .chat-line,html.aura-embed .message-author,html.aura-embed .message-bubble,html.aura-embed .system-message,html.aura-embed .typing-indicator,html.aura-embed .controls button,html.aura-embed .composer textarea { font-family:Anton,Impact,sans-serif }
+html.aura-embed .status-row { font-size:13px; letter-spacing:.035em }
+html.aura-embed .chat-line { font-size:16px; line-height:1.55; letter-spacing:.01em }
+html.aura-embed .message-author { font-size:10px; letter-spacing:.13em; text-transform:uppercase }
+html.aura-embed .system-message { letter-spacing:.02em }
+html.aura-embed .system-message strong { font-size:20px; line-height:1.2 }
+html.aura-embed .system-message span { font-size:15px; line-height:1.45 }
+html.aura-embed .composer textarea { font-size:17px; letter-spacing:.01em }
+html.aura-embed .controls button { font-size:13px; letter-spacing:.07em }
+@media(max-width:640px){html.aura-embed .chat-line{font-size:15px}html.aura-embed .composer textarea{font-size:16px}html.aura-embed .controls button{font-size:11px}}

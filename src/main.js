@@ -1,4 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
+import '@fontsource/anton/latin-400.css'
+import '@fontsource/anton/latin-ext-400.css'
 import './style.css'
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
@@ -29,7 +31,7 @@ if (!sessionId) {
 
 let roomId = null
 let channel = null
-let state = 'home'
+let state = 'searching'
 let isStopping = false
 let partnerPresent = false
 let messages = []
@@ -40,12 +42,18 @@ let localTypingSent = false
 let typingStopTimer = null
 let partnerTypingTimer = null
 let lastTypingBroadcastAt = 0
+let lobbyChannel = null
+let pairingInProgress = false
+let lobbyOfferSent = false
+let lobbyPairTimer = null
 
 const typingIdleDelay = 1200
 const typingHeartbeatDelay = 800
 const partnerTypingFallbackDelay = 2200
 
 const app = document.querySelector('#app')
+const embeddedChat = new URLSearchParams(window.location.search).has('embed')
+if (embeddedChat) document.documentElement.classList.add('aura-embed')
 const themeKey = 'nitra-space-chat-theme'
 const requestedReturnPath = new URLSearchParams(window.location.search).get('return')
 const returnPath = requestedReturnPath?.startsWith('/') && !requestedReturnPath.startsWith('//')
@@ -119,8 +127,9 @@ function bindThemeButtons() {
 
 
 function updateOnlineBadge() {
-  const el = document.querySelector('#onlineCount')
-  if (el) el.textContent = String(onlineCount)
+  document.querySelectorAll('.online-count').forEach(el => {
+    el.textContent = String(onlineCount)
+  })
 }
 
 async function setupOnlinePresence() {
@@ -163,7 +172,7 @@ function renderHome() {
         <div class="site-actions">
           <div class="online-badge" aria-live="polite">
             <span class="online-dot" aria-hidden="true"></span>
-            <span><strong id="onlineCount">${onlineCount}</strong> online</span>
+            <span><strong class="online-count">${onlineCount}</strong> online</span>
           </div>
           <button class="theme-toggle" type="button" data-theme-toggle></button>
         </div>
@@ -269,23 +278,23 @@ function renderChat() {
 
   app.innerHTML = `
     <main class="chat-page">
-      <header class="chat-header">
+      ${embeddedChat ? '' : `<header class="chat-header">
         <button id="brandHome" class="brand-home" type="button" aria-label="Späť na úvod">
           <strong>Nitra Space Chat</strong>
         </button>
         <div class="header-right">
           <span class="online-badge online-badge-header" aria-live="polite">
             <span class="online-dot" aria-hidden="true"></span>
-            <span><strong id="onlineCount">${onlineCount}</strong> online</span>
+            <span><strong class="online-count">${onlineCount}</strong> online</span>
           </span>
           <button class="theme-toggle" type="button" data-theme-toggle></button>
         </div>
-      </header>
+      </header>`}
 
       <section class="chat-window" aria-label="Anonymný chat">
         <div class="status-row ${state}">
-          <span class="status-dot" aria-hidden="true"></span>
-          <span>${statusText}</span>
+          <span class="status-main"><span class="status-dot" aria-hidden="true"></span><span>${statusText}</span></span>
+          <span class="online-badge chat-online-badge" aria-live="polite"><span class="online-dot" aria-hidden="true"></span><span><strong class="online-count">${onlineCount}</strong> online</span></span>
         </div>
 
         <div id="messages" class="transcript ${messages.length || partnerTyping ? '' : 'is-empty'}" aria-live="polite">
@@ -293,7 +302,7 @@ function renderChat() {
         </div>
 
         <div class="controls">
-          <button id="next" class="next-btn" type="button">NEXT</button>
+          <button id="next" class="next-btn" type="button">ĎALŠÍ</button>
 
           <form id="composer" class="composer">
             <label class="sr-only" for="message">Správa</label>
@@ -305,16 +314,16 @@ function renderChat() {
               placeholder="${state === 'connected' ? 'Napíš správu...' : 'Počkaj na pripojenie...'}"
               ${state === 'connected' ? '' : 'disabled'}
             ></textarea>
-            <button class="send-btn" type="submit" ${state === 'connected' ? '' : 'disabled'}>POSLAŤ</button>
+            <button class="send-btn" type="submit" ${state === 'connected' ? '' : 'disabled'}>ODOSLAŤ</button>
           </form>
 
-          <button id="leave" class="leave-btn" type="button">LEAVE</button>
+          <button id="leave" class="leave-btn" type="button">ODÍSŤ</button>
         </div>
       </section>
     </main>`
 
   document.querySelector('#leave').addEventListener('click', leaveChat)
-  document.querySelector('#brandHome').addEventListener('click', leaveChat)
+  document.querySelector('#brandHome')?.addEventListener('click', leaveChat)
   document.querySelector('#next').addEventListener('click', nextChat)
   document.querySelector('#composer').addEventListener('submit', sendMessage)
   bindThemeButtons()
@@ -460,6 +469,7 @@ function setStatus(nextState) {
 
 async function startChat() {
   if (isStopping) return
+  pairingInProgress = false
   resetTypingState()
   state = 'searching'
   messages = []
@@ -469,19 +479,119 @@ async function startChat() {
 }
 
 async function findPartner() {
-  try {
-    const { data, error } = await supabase.rpc('find_chat_partner', {
-      p_session_id: sessionId
+  if (lobbyChannel) await supabase.removeChannel(lobbyChannel)
+  lobbyOfferSent = false
+  clearTimeout(lobbyPairTimer)
+  lobbyChannel = supabase.channel('nitra-space-anonymous-lobby', {
+    config: { presence: { key: sessionId } }
+  })
+  lobbyChannel
+    .on('presence', { event: 'sync' }, () => {
+      tryPairFromLobby()
     })
-    if (error) throw error
+    .on('broadcast', { event: 'pair-offer' }, async ({ payload }) => {
+      if (state !== 'searching' || pairingInProgress || payload?.partner !== sessionId) return
+      const currentLobby = lobbyChannel
+      if (!currentLobby) return
+      const response = await currentLobby.send({
+        type: 'broadcast',
+        event: 'pair-accept',
+        payload: { initiator: payload.initiator, partner: sessionId, room_id: payload.room_id }
+      })
+      if (response !== 'ok') console.warn('Pair accept failed:', response)
+    })
+    .on('broadcast', { event: 'pair-accept' }, async ({ payload }) => {
+      if (state !== 'searching' || pairingInProgress || payload?.initiator !== sessionId) return
+      const currentLobby = lobbyChannel
+      if (!currentLobby) return
+      const response = await currentLobby.send({
+        type: 'broadcast',
+        event: 'pair-commit',
+        payload: { initiator: sessionId, partner: payload.partner, room_id: payload.room_id }
+      })
+      if (response !== 'ok') {
+        lobbyOfferSent = false
+        console.warn('Pair commit failed:', response)
+        return
+      }
+      scheduleLobbyPair(payload.partner, payload.room_id)
+    })
+    .on('broadcast', { event: 'pair-commit' }, ({ payload }) => {
+      if (state !== 'searching' || pairingInProgress) return
+      if (payload?.partner !== sessionId || !payload?.initiator || !payload?.room_id) return
+      scheduleLobbyPair(payload.initiator, payload.room_id)
+    })
+    .subscribe(async status => {
+      if (status === 'SUBSCRIBED') {
+        try {
+          await lobbyChannel?.track({
+            session_id: sessionId,
+            status: 'waiting',
+            waiting_since: new Date().toISOString()
+          })
+        } catch (error) {
+          console.error('Lobby presence failed:', error)
+          showFatal('Nepodarilo sa pripojiť k chatu.', error.message)
+        }
+      } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+        showFatal('Nepodarilo sa pripojiť k chatu.', `Realtime status: ${status}`)
+      }
+    })
+}
 
-    const match = Array.isArray(data) ? data[0] : data
-    if (!match?.room_id) throw new Error('Supabase nevrátil room_id.')
+function tryPairFromLobby() {
+  if (state !== 'searching' || isStopping || pairingInProgress || lobbyOfferSent || !lobbyChannel) return
+  const presence = lobbyChannel.presenceState()
+  const waiting = [...new Set(Object.entries(presence)
+    .filter(([, metas]) => metas.some(meta => meta.status === 'waiting'))
+    .map(([key]) => key))].sort()
+  const index = waiting.indexOf(sessionId)
+  if (index < 0 || waiting.length < 2) return
 
-    roomId = match.room_id
-    await joinRoom(match.partner_session_id)
+  const pairStart = Math.floor(index / 2) * 2
+  const first = waiting[pairStart]
+  const second = waiting[pairStart + 1]
+  if (!first || !second) return
+  if (first !== sessionId) return
+  lobbyOfferSent = true
+  const room = [first, second].sort()
+  void lobbyChannel.send({
+    type: 'broadcast',
+    event: 'pair-offer',
+    payload: { initiator: first, partner: second, room_id: `${room[0]}-${room[1]}` }
+  }).then(response => {
+    if (response !== 'ok') {
+      lobbyOfferSent = false
+      console.warn('Pair offer failed:', response)
+    }
+  }).catch(error => {
+    lobbyOfferSent = false
+    console.warn('Pair offer failed:', error)
+  })
+}
+
+function scheduleLobbyPair(partnerSessionId, sharedRoomId) {
+  if (lobbyPairTimer || state !== 'searching' || pairingInProgress) return
+  // Give both clients time to receive the commit before either leaves Presence.
+  lobbyPairTimer = setTimeout(() => {
+    lobbyPairTimer = null
+    void pairFromLobby(partnerSessionId, sharedRoomId)
+  }, 180)
+}
+
+async function pairFromLobby(partnerSessionId, sharedRoomId) {
+  if (pairingInProgress || state !== 'searching' || isStopping) return
+  pairingInProgress = true
+  roomId = sharedRoomId
+  const oldLobby = lobbyChannel
+  lobbyChannel = null
+  if (oldLobby) await supabase.removeChannel(oldLobby)
+  try {
+    await joinRoom(partnerSessionId)
   } catch (error) {
     console.error(error)
+    pairingInProgress = false
+    lobbyOfferSent = false
     showFatal('Nepodarilo sa pripojiť k chatu.', error.message)
   }
 }
@@ -516,6 +626,7 @@ async function joinRoom(partnerSessionId) {
       clearPartnerTypingTimer()
       partnerTyping = false
       partnerPresent = true
+      pairingInProgress = false
       setStatus('connected')
     })
     .on('broadcast', { event: 'left' }, ({ payload }) => {
@@ -526,9 +637,13 @@ async function joinRoom(partnerSessionId) {
       if (!isStopping) setStatus('ended')
     })
     .on('presence', { event: 'sync' }, () => {
-      const presence = channel.presenceState()
-      const keys = Object.keys(presence)
-      if (state === 'connected' && keys.length < 2 && partnerPresent && !isStopping) {
+      const keys = Object.keys(channel.presenceState())
+      const hasPartner = keys.some(key => key !== sessionId)
+      if (hasPartner) {
+        partnerPresent = true
+        pairingInProgress = false
+        if (state !== 'connected') setStatus('connected')
+      } else if (state === 'connected' && partnerPresent && !isStopping) {
         partnerPresent = false
         clearPartnerTypingTimer()
         partnerTyping = false
@@ -550,8 +665,6 @@ async function joinRoom(partnerSessionId) {
         try {
           await channel.track({ session_id: sessionId })
           if (partnerSessionId) {
-            partnerPresent = true
-            setStatus('connected')
             await broadcast('matched', {})
           }
           resolve()
@@ -606,12 +719,11 @@ function scrollMessages() {
 }
 
 async function closeCurrentRoom() {
-  if (!roomId) return
-
   try {
-    await setLocalTyping(false)
-    await broadcast('left', {})
-    await supabase.rpc('close_chat_room', { p_room_id: roomId })
+    if (roomId) {
+      await setLocalTyping(false)
+      await broadcast('left', {})
+    }
   } catch (error) {
     console.warn('Closing room failed:', error)
   } finally {
@@ -619,7 +731,16 @@ async function closeCurrentRoom() {
       await supabase.removeChannel(channel)
       channel = null
     }
+    if (lobbyChannel) {
+      await supabase.removeChannel(lobbyChannel)
+      lobbyChannel = null
+    }
     roomId = null
+    partnerPresent = false
+    pairingInProgress = false
+    lobbyOfferSent = false
+    clearTimeout(lobbyPairTimer)
+    lobbyPairTimer = null
     resetTypingState()
   }
 }
@@ -688,4 +809,5 @@ if (window.visualViewport) {
 }
 
 render()
+startChat()
 setupOnlinePresence()

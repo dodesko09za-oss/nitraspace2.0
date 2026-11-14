@@ -34,6 +34,7 @@ const state = {
   analyticsDate: localDateKey(),
   analytics: null,
   analyticsError: '',
+  announcement: { title: '', message: '', active: false },
   onlineCount: 0,
   editingEventId: null,
   composerOpen: false,
@@ -609,6 +610,7 @@ function eventsSection() {
           <label>Link na event<input name="link" type="url" value="${escapeHtml(editingEvent?.link || '')}" placeholder="https://..." required></label>
           <label>Instagram skupina pre ľudí, ktorí idú<input name="instagramGroupUrl" type="url" maxlength="500" value="${escapeHtml(editingEvent?.instagramGroupUrl || '')}" placeholder="https://ig.me/j/..." aria-describedby="eventInstagramHelp"><small id="eventInstagramHelp">Vlož pozývací odkaz Instagram skupiny (instagram.com alebo ig.me). Nechaj prázdne, ak ju event nemá.</small></label>
           <label class="event-room-toggle"><input name="roomEnabled" type="checkbox" ${editingEvent?.roomEnabled === false ? '' : 'checked'}><span><strong>Zapnúť chat eventu</strong><small>Prihlásení ľudia sa pridajú k eventu a môžu si písať v chate pred eventom.</small></span></label>
+          <div class="announcement-fields"><div class="admin-label"><span>UPOZORNENIE NÁVŠTEVNÍKOM</span><small>Sklenená karta po otvorení webu</small></div><label>Fotka eventu v upozornení<select name="announcementEvent"><option value="">Bez fotky eventu</option>${state.events.map(item=>`<option value="${escapeHtml(item.id)}" ${state.announcement.event_id===item.id?'selected':''}>${escapeHtml(item.title)}</option>`).join('')}</select></label><label>Nadpis upozornenia<input name="announcementTitle" maxlength="120" value="${escapeHtml(state.announcement.title)}" placeholder="Pozor, blíži sa event"></label><label>Text upozornenia<textarea name="announcementMessage" maxlength="500" placeholder="Napíš krátky oznam o evente">${escapeHtml(state.announcement.message)}</textarea></label><label><input type="checkbox" name="announcementActive" ${state.announcement.active ? 'checked' : ''}> Zobraziť upozornenie návštevníkom</label></div>
           <label class="image-upload"><span>Fotka eventu · pomer 4:5</span><div class="image-upload-preview" id="eventImagePreview">${editingEvent?.image ? `<img src="${escapeHtml(editingEvent.image)}" alt="Aktuálna fotka eventu"><small>Aktuálna fotka · výberom súboru ju nahradíš</small>` : '<strong>4:5</strong><small>Vyber fotografiu alebo plagát</small>'}</div><input name="image" type="file" accept="image/jpeg,image/png,image/webp"><small class="selected-file" id="selectedEventFile">${editingEvent?.image ? 'Ak nevyberieš novú fotku, pôvodná zostane.' : 'Vyber JPG, PNG alebo WEBP. Fotka sa uloží po kliknutí na Zverejniť event.'}</small></label>
           <button type="submit">${editingEvent ? 'ULOŽIŤ ZMENY' : 'ZVEREJNIŤ EVENT'}</button>
         </form>` : ''}
@@ -977,6 +979,8 @@ function bind() {
     state.adminGateOpen = false
     state.adminError = ''
     state.adminAuthenticated = true
+    const announcement = await supabase.rpc('get_site_announcement')
+    if (!announcement.error && announcement.data) state.announcement = announcement.data
     state.adminPassword = ''
     state.adminOpen = true
     try {
@@ -1073,6 +1077,18 @@ function bind() {
         submitButton.disabled = false
         submitButton.textContent = existingEvent ? 'ULOŽIŤ ZMENY' : 'ZVEREJNIŤ EVENT'
         return
+      }
+
+      const announcement = await supabase.rpc('manage_site_announcement', {
+        p_title: String(form.get('announcementTitle') || '').trim(),
+        p_message: String(form.get('announcementMessage') || '').trim(),
+        p_event_id: String(form.get('announcementEvent') || '') || null,
+        p_active: form.get('announcementActive') === 'on'
+      })
+      if (announcement.error) {
+        alert(`Event sa uložil, ale upozornenie nie: ${announcement.error.message}`)
+      } else {
+        state.announcement = announcement.data
       }
 
       const savedEvent = eventFromRow(data)

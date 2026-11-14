@@ -54,7 +54,7 @@ export default ({mode}) => {
       const result=await handleNewsDiscover({authorization:req.headers.authorization,url:env.VITE_SUPABASE_URL,key:env.VITE_SUPABASE_ANON_KEY,query:body.query,queries:body.queries,sourceId:body.source_id,env:editorialEnv})
       res.statusCode=result.status;res.setHeader('Content-Type','application/json; charset=utf-8');res.setHeader('Cache-Control','no-store');res.end(JSON.stringify(result.body))
     })
-    server.middlewares.use((req,_res,next)=>{if(/^\/(news|polls|people|messages|account|activity|admin)(\/|\?|$)/.test(req.url))req.url='/index.html';next()})
+    server.middlewares.use((req,_res,next)=>{if(req.url==='/'||req.url.startsWith('/?'))req.url='/index.html';else if(/^\/links(\?|$)/.test(req.url))req.url='/links.html';else if(/^\/space(\?|$)/.test(req.url))req.url='/space.html';else if(/^\/(news|polls|people|messages|account|activity|admin)(\/|\?|$)/.test(req.url))req.url='/space.html';next()})
   }}],
   optimizeDeps: {
     exclude: ['@supabase/supabase-js']
@@ -63,9 +63,10 @@ export default ({mode}) => {
     rollupOptions: {
       input: {
         main: resolve(root, 'index.html'),
+        space: resolve(root, 'space.html'),
         chat: resolve(root, 'chat.html'),
         social: resolve(root, 'social.html')
-        ,designPreview: resolve(root, 'design-preview.html'),chromePreview: resolve(root, 'chrome-preview.html')
+        ,designPreview: resolve(root, 'design-preview.html'),chromePreview: resolve(root, 'chrome-preview.html'),linktree: resolve(root, 'links.html')
       }
     }
   }
