@@ -160,3 +160,11 @@ main#main.is-anonymous-chat{padding:0!important;background:#000}
 .event-place{font-size:12px;line-height:1.4;color:#b8bdc3;text-transform:uppercase}
 .event-card-body .tags{padding:4px 0 0}
 @media(min-width:760px){.event-card{min-height:0}.event-card-media{aspect-ratio:4/5;max-height:600px}.event-card-body{padding:22px}.event-card-body h2{font-size:42px}}
+
+/* iPhone safe areas: move the header below the status bar and reserve one bottom inset only. */
+@media(max-width:759px){
+  header{height:calc(94px + env(safe-area-inset-top));padding:calc(18px + env(safe-area-inset-top)) 22px 18px}
+  main{min-height:calc(100svh - 94px - env(safe-area-inset-top));padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+  main:has(.chat-full){height:calc(100svh - 94px - env(safe-area-inset-top) - 68px - env(safe-area-inset-bottom))}
+  main:has(.events){height:calc(100svh - 94px - env(safe-area-inset-top) - 68px - env(safe-area-inset-bottom))}
+}

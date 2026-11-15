@@ -293,3 +293,8 @@ html.aura-embed .send-btn { min-height:76px }
   html.aura-embed .prechat-target-options button { flex:1 1 0; min-width:0; min-height:37px; padding:0 6px; font-size:10px }
   html.aura-embed .composer textarea,html.aura-embed .send-btn { height:110px; min-height:110px }
 }
+@media(max-width:640px) {
+  /* The parent app already reserves the iPhone bottom safe area for its tab bar. */
+  html.aura-embed .chat-window { padding-bottom:8px }
+  html.aura-embed .controls { padding-bottom:0 }
+}
