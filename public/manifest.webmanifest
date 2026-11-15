@@ -3,7 +3,7 @@
   "name": "Nitra Space",
   "short_name": "Nitra Space",
   "description": "Chat, eventy a komunita v Nitre.",
-  "start_url": "/space#chat",
+  "start_url": "/chat",
   "scope": "/",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],

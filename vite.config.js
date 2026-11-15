@@ -63,7 +63,7 @@ export default ({mode}) => {
       const result=await handleAuthBridge({authorization:req.headers.authorization,origin:req.headers.origin,profile:body.profile,env:{...env,...process.env}})
       res.statusCode=result.status;res.setHeader('Content-Type','application/json; charset=utf-8');res.setHeader('Cache-Control','no-store');res.end(JSON.stringify(result.body))
     })
-    server.middlewares.use((req,_res,next)=>{if(req.url==='/'||req.url.startsWith('/?'))req.url='/index.html';else if(/^\/links(\?|$)/.test(req.url))req.url='/links.html';else if(/^\/space(\?|$)/.test(req.url))req.url='/space.html';else if(/^\/(news|polls|people|messages|account|activity|admin)(\/|\?|$)/.test(req.url))req.url='/space.html';next()})
+    server.middlewares.use((req,_res,next)=>{if(req.url==='/'||req.url.startsWith('/?'))req.url='/index.html';else if(/^\/links(\?|$)/.test(req.url))req.url='/links.html';else if(/^\/(space|chat)(\?|$)/.test(req.url))req.url='/space.html';else if(/^\/(news|polls|people|messages|account|activity|admin)(\/|\?|$)/.test(req.url))req.url='/space.html';next()})
   }}],
   optimizeDeps: {
     exclude: ['@supabase/supabase-js']

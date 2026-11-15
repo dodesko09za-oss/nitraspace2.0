@@ -29,7 +29,7 @@
     {"source":"/admin/:path*","destination":"/space.html"},
     {
       "source": "/chat",
-      "destination": "/chat.html"
+      "destination": "/space.html"
     }
   ]
 }
