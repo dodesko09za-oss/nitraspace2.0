@@ -31,7 +31,6 @@ if (!sessionId) {
 }
 
 const genderSelectionEnabled = new URLSearchParams(window.location.search).get('match') === 'gender'
-let selectedGender = null
 let lookingForGender = null
 let roomId = null
 let channel = null
@@ -303,27 +302,6 @@ function renderChat() {
           <span class="online-badge chat-online-badge" aria-live="polite"><span class="online-dot" aria-hidden="true"></span><span><strong class="online-count">${onlineCount}</strong> online</span></span>
         </div>
 
-        ${genderSelectionEnabled && state === 'choosing' ? `<section class="gender-preference-preview" aria-label="Nastavenie anonymného spojenia">
-          <div class="gender-preference-copy"><span class="gender-eyebrow">IBA PRE TOTO SPOJENIE</span><strong>Vyber si, s kým sa chceš spojiť</strong></div>
-          <div class="gender-selection-row">
-            <span class="gender-selection-label">Som</span>
-            <div class="gender-preference-options" role="group" aria-label="Vyber svoje pohlavie">
-              <button type="button" data-chat-gender="guy" aria-pressed="false">Chalan</button>
-              <button type="button" data-chat-gender="girl" aria-pressed="false">Baba</button>
-              <button type="button" data-chat-gender="any" aria-pressed="false">Nepoviem</button>
-            </div>
-          </div>
-          <div class="gender-selection-row">
-            <span class="gender-selection-label">Hľadám</span>
-            <div class="gender-preference-options" role="group" aria-label="Vyber koho chceš stretnúť">
-              <button type="button" data-chat-looking="guy" aria-pressed="false">Chalana</button>
-              <button type="button" data-chat-looking="girl" aria-pressed="false">Babu</button>
-              <button type="button" data-chat-looking="random" aria-pressed="false">Náhodne</button>
-            </div>
-          </div>
-          <p class="gender-preference-note" data-gender-note>Chat ostáva otvorený. Výber platí iba pre toto spojenie.</p>
-        </section>` : ''}
-
         <div id="messages" class="transcript ${messages.length || partnerTyping ? '' : 'is-empty'}" aria-live="polite">
           ${transcriptTemplate()}
         </div>
@@ -352,28 +330,22 @@ function renderChat() {
   document.querySelector('#leave').addEventListener('click', leaveChat)
   document.querySelector('#brandHome')?.addEventListener('click', leaveChat)
   if (genderSelectionEnabled && state === 'choosing') {
-    const updateChoiceGroup = (selector, chosenValue, attribute) => {
-      document.querySelectorAll(selector).forEach(option => {
-        const selected = option.getAttribute(attribute) === chosenValue
+    const updateLookingChoice = () => {
+      document.querySelectorAll('[data-chat-looking]').forEach(option => {
+        const selected = option.dataset.chatLooking === lookingForGender
         option.setAttribute('aria-pressed', String(selected))
         option.classList.toggle('selected', selected)
       })
-      const ready = Boolean(selectedGender && lookingForGender)
+      const ready = Boolean(lookingForGender)
       document.querySelector('#next').disabled = !ready
       document.querySelector('[data-gender-note]').textContent = ready
-        ? `Vybrané: ${selectedGender === 'guy' ? 'chalan' : selectedGender === 'girl' ? 'baba' : 'nepoviem'} · hľadám ${lookingForGender === 'guy' ? 'chalana' : lookingForGender === 'girl' ? 'babu' : 'náhodne'}`
-        : 'Chat ostáva otvorený. Výber platí iba pre toto spojenie.'
+        ? 'Preferencia sa použije pri párovaní. Pohlavie sa neoveruje.'
+        : 'Vyber si preferenciu pre toto spojenie.'
     }
-    document.querySelectorAll('[data-chat-gender]').forEach(button => {
-      button.addEventListener('click', () => {
-        selectedGender = button.dataset.chatGender
-        updateChoiceGroup('[data-chat-gender]', selectedGender, 'data-chat-gender')
-      })
-    })
     document.querySelectorAll('[data-chat-looking]').forEach(button => {
       button.addEventListener('click', () => {
         lookingForGender = button.dataset.chatLooking
-        updateChoiceGroup('[data-chat-looking]', lookingForGender, 'data-chat-looking')
+        updateLookingChoice()
       })
     })
     document.querySelector('#next').addEventListener('click', startChat)
@@ -405,12 +377,19 @@ function renderChat() {
 }
 
 function emptyTranscript() {
-  if (state === 'choosing') {
+  if (state === 'choosing' && genderSelectionEnabled) {
     return `
-      <div class="system-message">
-        <strong>Chat zostáva otvorený.</strong>
-        <span>Najprv si vyber, koho chceš stretnúť.</span>
-      </div>`
+      <section class="prechat-choice" aria-label="Výber človeka do anonymného chatu">
+        <span class="prechat-eyebrow">NITRA SPACE / ANONYM CHAT</span>
+        <h2>Koho chceš stretnúť?</h2>
+        <p class="prechat-subtitle">Vyber si a chat otvorí spojenie.</p>
+        <div class="prechat-target-options" role="group" aria-label="Koho hľadáš">
+          <button type="button" data-chat-looking="guy" aria-pressed="false">Chalana</button>
+          <button type="button" data-chat-looking="girl" aria-pressed="false">Babu</button>
+          <button type="button" data-chat-looking="random" aria-pressed="false">Náhodne</button>
+        </div>
+        <small class="prechat-privacy-note" data-gender-note>Vyber si preferenciu pre toto spojenie.</small>
+      </section>`
   }
 
   if (state === 'searching') {
@@ -590,7 +569,6 @@ async function findPartner() {
           await lobbyChannel?.track({
             session_id: sessionId,
             status: 'waiting',
-            gender: selectedGender || 'any',
             looking_for: lookingForGender || 'random',
             waiting_since: new Date().toISOString()
           })

@@ -2,40 +2,44 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { areChatPreferencesCompatible, selectCompatiblePairs } from '../src/chat-matching.js'
 
-test('pairs two people whose gender preferences are mutually compatible', () => {
+test('pairs reciprocal girl and guy preferences without asking for identity', () => {
   assert.equal(areChatPreferencesCompatible(
-    { gender: 'guy', looking_for: 'girl' },
-    { gender: 'girl', looking_for: 'guy' }
+    { looking_for: 'guy' },
+    { looking_for: 'girl' }
   ), true)
 })
 
-test('does not pair people when only one side accepts the other', () => {
+test('does not prioritize two identical specific preferences', () => {
   assert.equal(areChatPreferencesCompatible(
-    { gender: 'guy', looking_for: 'girl' },
-    { gender: 'girl', looking_for: 'girl' }
+    { looking_for: 'girl' },
+    { looking_for: 'girl' }
   ), false)
 })
 
-test('random preference accepts any declared or undisclosed gender', () => {
+test('random preference can pair with any preference', () => {
   assert.equal(areChatPreferencesCompatible(
-    { gender: 'any', looking_for: 'random' },
-    { gender: 'girl', looking_for: 'random' }
+    { looking_for: 'random' },
+    { looking_for: 'girl' }
+  ), true)
+  assert.equal(areChatPreferencesCompatible(
+    { looking_for: 'random' },
+    { looking_for: 'random' }
   ), true)
 })
 
-test('a specific preference does not match an undisclosed gender', () => {
+test('missing preference from an older client safely defaults to random', () => {
   assert.equal(areChatPreferencesCompatible(
     { gender: 'guy', looking_for: 'girl' },
-    { gender: 'any', looking_for: 'random' }
-  ), false)
+    { gender: 'girl' }
+  ), true)
 })
 
 test('chooses compatible pairs in stable order and never reuses a session', () => {
   const pairs = selectCompatiblePairs([
-    { key: 'c', meta: { gender: 'girl', looking_for: 'guy' } },
-    { key: 'a', meta: { gender: 'guy', looking_for: 'girl' } },
-    { key: 'b', meta: { gender: 'guy', looking_for: 'random' } },
-    { key: 'd', meta: { gender: 'any', looking_for: 'random' } }
+    { key: 'c', meta: { looking_for: 'guy' } },
+    { key: 'a', meta: { looking_for: 'girl' } },
+    { key: 'b', meta: { looking_for: 'random' } },
+    { key: 'd', meta: { looking_for: 'random' } }
   ])
 
   assert.deepEqual(pairs.map(pair => pair.map(session => session.key)), [['a', 'c'], ['b', 'd']])

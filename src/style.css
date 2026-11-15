@@ -272,25 +272,24 @@ html.aura-embed .composer textarea { font-size:17px; letter-spacing:.01em }
 html.aura-embed .controls button { font-size:13px; letter-spacing:.07em }
 @media(max-width:640px){html.aura-embed .chat-line{font-size:15px}html.aura-embed .composer textarea{font-size:16px}html.aura-embed .controls button{font-size:11px}}
 
-/* Compact gender chooser preview and give the message composer more room. */
+/* Open, centered pre-chat picker: keep space for the transcript and composer. */
 html.aura-embed .chat-window { gap:8px }
-html.aura-embed .gender-preference-preview { grid-template-columns:1fr; gap:4px; padding:7px 10px; border-radius:12px }
-html.aura-embed .gender-preference-copy { display:none }
-html.aura-embed .gender-selection-row { display:grid; grid-template-columns:58px minmax(0,1fr); align-items:center; gap:6px }
-html.aura-embed .gender-selection-label { color:#999; font:800 8px/1 Inter,system-ui,sans-serif; letter-spacing:.13em; text-transform:uppercase }
-html.aura-embed .gender-preference-options { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:5px }
-html.aura-embed .gender-preference-options button { min-width:0; min-height:29px; gap:5px; padding:0 8px; font-size:10px; letter-spacing:.015em }
-html.aura-embed .gender-preference-options button i { font-size:13px }
-html.aura-embed .gender-preference-note { margin:0 0 0 64px; font-family:Inter,system-ui,sans-serif; font-size:8px }
-html.aura-embed .composer textarea { height:70px; min-height:70px; max-height:126px }
-html.aura-embed .send-btn { min-height:70px }
+html.aura-embed .prechat-choice { width:min(100%,480px); margin:auto; display:flex; flex-direction:column; align-items:center; gap:13px; padding:28px 24px; border:0; border-radius:0; background:transparent; box-shadow:none; text-align:center }
+html.aura-embed .prechat-eyebrow { color:#858585; font:700 8px/1.2 Inter,system-ui,sans-serif; letter-spacing:.2em }
+html.aura-embed .prechat-choice h2 { margin:0; color:#f4f4f4; font:400 clamp(23px,3vw,29px)/1 Anton,Impact,sans-serif; letter-spacing:.01em }
+html.aura-embed .prechat-subtitle { margin:-6px 0 3px; color:#898989; font:400 11px/1.45 Inter,system-ui,sans-serif }
+html.aura-embed .prechat-target-options { width:100%; display:flex; justify-content:center; gap:10px }
+html.aura-embed .prechat-target-options button { min-width:100px; min-height:39px; padding:0 15px; border:1px solid #ffffff24; border-radius:999px; background:transparent; color:#bcbcbc; font:400 11px/1 Anton,Impact,sans-serif; letter-spacing:.04em; transition:background .16s,border-color .16s,color .16s }
+html.aura-embed .prechat-target-options button:hover { border-color:#ffffff68; color:#fff }
+html.aura-embed .prechat-target-options button.selected { border-color:#ededed; background:#ededed; color:#080808 }
+html.aura-embed .prechat-privacy-note { min-height:12px; color:#777; font:400 9px/1.35 Inter,system-ui,sans-serif }
+html.aura-embed .composer textarea { height:76px; min-height:76px; max-height:126px }
+html.aura-embed .send-btn { min-height:76px }
 @media(max-width:640px) {
   html.aura-embed .chat-window { gap:6px; padding:6px 8px calc(8px + env(safe-area-inset-bottom)) }
-  html.aura-embed .gender-preference-preview { gap:4px; padding:6px 8px }
-  html.aura-embed .gender-selection-row { grid-template-columns:47px minmax(0,1fr); gap:4px }
-  html.aura-embed .gender-selection-label { font-size:7px }
-  html.aura-embed .gender-preference-options { gap:4px }
-  html.aura-embed .gender-preference-options button { min-height:29px; padding:0 4px; font-size:9px }
-  html.aura-embed .gender-preference-note { display:none }
+  html.aura-embed .prechat-choice { width:min(100%,420px); gap:11px; padding:18px 8px }
+  html.aura-embed .prechat-choice h2 { font-size:24px }
+  html.aura-embed .prechat-target-options { gap:6px }
+  html.aura-embed .prechat-target-options button { flex:1 1 0; min-width:0; min-height:37px; padding:0 6px; font-size:10px }
   html.aura-embed .composer textarea,html.aura-embed .send-btn { height:110px; min-height:110px }
 }
