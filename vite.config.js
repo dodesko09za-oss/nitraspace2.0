@@ -6,6 +6,7 @@ import {renderCoverPng} from './server/news-card.js'
 import {createClient} from '@supabase/supabase-js'
 import {handleGeneration} from './server/news-generation.js'
 import { handleEditorialDiscovery } from './server/editorial-discovery.js'
+import { handleAuthBridge } from './server/auth-bridge.js'
 import dropMp4 from './api/drop-mp4.js'
 
 const root = fileURLToPath(new URL('.', import.meta.url))
@@ -54,6 +55,14 @@ export default ({mode}) => {
       const result=await handleNewsDiscover({authorization:req.headers.authorization,url:env.VITE_SUPABASE_URL,key:env.VITE_SUPABASE_ANON_KEY,query:body.query,queries:body.queries,sourceId:body.source_id,env:editorialEnv})
       res.statusCode=result.status;res.setHeader('Content-Type','application/json; charset=utf-8');res.setHeader('Cache-Control','no-store');res.end(JSON.stringify(result.body))
     })
+    server.middlewares.use('/api/auth-bridge',async(req,res,next)=>{
+      if(req.method!=='POST')return next()
+      let size=0;const chunks=[]
+      for await(const chunk of req){size+=chunk.length;if(size>4096){res.statusCode=413;return res.end(JSON.stringify({error:'Požiadavka je príliš veľká.'}))}chunks.push(chunk)}
+      let body={};try{body=JSON.parse(Buffer.concat(chunks).toString('utf8')||'{}')}catch{res.statusCode=400;return res.end(JSON.stringify({error:'Neplatná požiadavka.'}))}
+      const result=await handleAuthBridge({authorization:req.headers.authorization,origin:req.headers.origin,profile:body.profile,env:{...env,...process.env}})
+      res.statusCode=result.status;res.setHeader('Content-Type','application/json; charset=utf-8');res.setHeader('Cache-Control','no-store');res.end(JSON.stringify(result.body))
+    })
     server.middlewares.use((req,_res,next)=>{if(req.url==='/'||req.url.startsWith('/?'))req.url='/index.html';else if(/^\/links(\?|$)/.test(req.url))req.url='/links.html';else if(/^\/space(\?|$)/.test(req.url))req.url='/space.html';else if(/^\/(news|polls|people|messages|account|activity|admin)(\/|\?|$)/.test(req.url))req.url='/space.html';next()})
   }}],
   optimizeDeps: {
@@ -66,7 +75,7 @@ export default ({mode}) => {
         space: resolve(root, 'space.html'),
         chat: resolve(root, 'chat.html'),
         social: resolve(root, 'social.html')
-        ,designPreview: resolve(root, 'design-preview.html'),chromePreview: resolve(root, 'chrome-preview.html'),linktree: resolve(root, 'links.html')
+        ,designPreview: resolve(root, 'design-preview.html'),chromePreview: resolve(root, 'chrome-preview.html'),linktree: resolve(root, 'links.html'),videoChat: resolve(root, 'video-chat.html')
       }
     }
   }
