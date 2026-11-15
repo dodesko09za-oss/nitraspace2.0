@@ -75,7 +75,7 @@ export default ({mode}) => {
         space: resolve(root, 'space.html'),
         chat: resolve(root, 'chat.html'),
         social: resolve(root, 'social.html')
-        ,designPreview: resolve(root, 'design-preview.html'),chromePreview: resolve(root, 'chrome-preview.html'),linktree: resolve(root, 'links.html'),videoChat: resolve(root, 'video-chat.html')
+        ,designPreview: resolve(root, 'design-preview.html'),chromePreview: resolve(root, 'chrome-preview.html'),linktree: resolve(root, 'links.html')
       }
     }
   }
