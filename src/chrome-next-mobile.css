@@ -167,4 +167,6 @@ main#main.is-anonymous-chat{padding:0!important;background:#000}
   main{min-height:calc(100svh - 94px - env(safe-area-inset-top));padding-bottom:calc(96px + env(safe-area-inset-bottom))}
   main:has(.chat-full){height:calc(100svh - 94px - env(safe-area-inset-top) - 68px - env(safe-area-inset-bottom))}
   main:has(.events){height:calc(100svh - 94px - env(safe-area-inset-top) - 68px - env(safe-area-inset-bottom))}
+  html,body{width:100%;max-width:100%;overflow-x:clip;overscroll-behavior-x:none}
+  #chrome-app{width:100%;max-width:100%;overflow-x:clip}
 }
