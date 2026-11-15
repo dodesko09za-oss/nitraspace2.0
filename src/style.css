@@ -87,6 +87,21 @@ body.modal-open { overflow:hidden }
 .status-row.ended { color:var(--red) }
 .status-row.ended .status-dot { background:var(--red) }
 @keyframes pulse { 50% { opacity:.35 } }
+.gender-preference-preview { flex:0 0 auto; display:grid; grid-template-columns:minmax(150px,1fr) auto; align-items:center; gap:8px 16px; padding:11px 14px; border:1px solid rgba(255,255,255,.16); border-radius:15px; background:linear-gradient(135deg,rgba(255,255,255,.055),rgba(255,255,255,.018) 50%,rgba(255,255,255,.035)); box-shadow:inset 0 1px rgba(255,255,255,.07),0 8px 22px rgba(0,0,0,.18) }
+.gender-preference-copy { min-width:0; display:flex; flex-direction:column; gap:3px }
+.gender-eyebrow { color:var(--faint); font-size:8px; font-weight:800; letter-spacing:.18em }
+.gender-preference-copy strong { color:var(--text); font-size:13px; font-weight:700; letter-spacing:-.015em }
+.gender-preference-options { display:flex; align-items:center; gap:6px }
+.gender-preference-options button { min-width:94px; min-height:39px; display:inline-flex; align-items:center; justify-content:center; gap:7px; padding:0 12px; border:1px solid rgba(255,255,255,.16); border-radius:999px; background:rgba(0,0,0,.23); color:#c2c5c8; font-size:11px; font-weight:650; transition:background .18s,border-color .18s,color .18s,transform .18s }
+.gender-preference-options button:hover { border-color:rgba(255,255,255,.42); color:#fff; transform:translateY(-1px) }
+.gender-preference-options button.selected { border-color:rgba(255,255,255,.82); background:linear-gradient(180deg,#fff,#d5d9dc 58%,#a4adb3); color:#070809; box-shadow:inset 0 1px #fff,0 3px 12px #0007 }
+.gender-preference-options button i { font-style:normal; font-size:15px; line-height:1 }
+.gender-preference-note { grid-column:1/-1; margin:0; color:var(--faint); font-size:10px; letter-spacing:.015em }
+.gender-preference-preview+.transcript { min-height:150px }
+html.aura-embed .gender-preference-preview { border-color:rgba(255,255,255,.15); background:linear-gradient(120deg,rgba(255,255,255,.07),rgba(255,255,255,.025) 42%,rgba(255,255,255,.045)); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px) }
+html.aura-embed .gender-preference-options button { border-color:rgba(255,255,255,.17); background:rgba(4,5,6,.45); color:#c6c9cc }
+html.aura-embed .gender-preference-options button.selected { border-color:#f3f5f6; background:linear-gradient(180deg,#fff,#dce0e2 55%,#aab2b7); color:#08090a }
+@media(max-width:560px) { .gender-preference-preview { grid-template-columns:1fr; gap:9px; padding:10px 12px } .gender-preference-options { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px } .gender-preference-options button { min-width:0; min-height:37px; gap:5px; padding:0 7px; font-size:10px } .gender-preference-note { grid-column:auto; font-size:9px } }
 .transcript { min-height:0; flex:1 1 auto; display:flex; flex-direction:column; overflow-x:hidden; overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; padding:18px; border:1px solid var(--line); border-radius:16px; background:var(--surface) }
 .chat-line { width:fit-content; max-width:min(72%,620px); display:flex; flex-direction:column; gap:4px; margin:0 0 12px; font-size:15px; line-height:1.42 }
 .chat-line.mine { align-self:flex-end; align-items:flex-end }
@@ -256,3 +271,26 @@ html.aura-embed .system-message span { font-size:15px; line-height:1.45 }
 html.aura-embed .composer textarea { font-size:17px; letter-spacing:.01em }
 html.aura-embed .controls button { font-size:13px; letter-spacing:.07em }
 @media(max-width:640px){html.aura-embed .chat-line{font-size:15px}html.aura-embed .composer textarea{font-size:16px}html.aura-embed .controls button{font-size:11px}}
+
+/* Compact gender chooser preview and give the message composer more room. */
+html.aura-embed .chat-window { gap:8px }
+html.aura-embed .gender-preference-preview { grid-template-columns:1fr; gap:4px; padding:7px 10px; border-radius:12px }
+html.aura-embed .gender-preference-copy { display:none }
+html.aura-embed .gender-selection-row { display:grid; grid-template-columns:58px minmax(0,1fr); align-items:center; gap:6px }
+html.aura-embed .gender-selection-label { color:#999; font:800 8px/1 Inter,system-ui,sans-serif; letter-spacing:.13em; text-transform:uppercase }
+html.aura-embed .gender-preference-options { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:5px }
+html.aura-embed .gender-preference-options button { min-width:0; min-height:29px; gap:5px; padding:0 8px; font-size:10px; letter-spacing:.015em }
+html.aura-embed .gender-preference-options button i { font-size:13px }
+html.aura-embed .gender-preference-note { margin:0 0 0 64px; font-family:Inter,system-ui,sans-serif; font-size:8px }
+html.aura-embed .composer textarea { height:70px; min-height:70px; max-height:126px }
+html.aura-embed .send-btn { min-height:70px }
+@media(max-width:640px) {
+  html.aura-embed .chat-window { gap:6px; padding:6px 8px calc(8px + env(safe-area-inset-bottom)) }
+  html.aura-embed .gender-preference-preview { gap:4px; padding:6px 8px }
+  html.aura-embed .gender-selection-row { grid-template-columns:47px minmax(0,1fr); gap:4px }
+  html.aura-embed .gender-selection-label { font-size:7px }
+  html.aura-embed .gender-preference-options { gap:4px }
+  html.aura-embed .gender-preference-options button { min-height:29px; padding:0 4px; font-size:9px }
+  html.aura-embed .gender-preference-note { display:none }
+  html.aura-embed .composer textarea,html.aura-embed .send-btn { height:110px; min-height:110px }
+}

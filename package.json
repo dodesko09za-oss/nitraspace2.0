@@ -8,7 +8,7 @@
     "build": "vite build --configLoader runner",
     "preview": "vite preview",
     "typecheck": "tsc --allowJs --checkJs --noEmit --strict false --skipLibCheck --target ES2023 --module NodeNext --moduleResolution NodeNext --lib ES2023,DOM server/news-ai.js server/news-generation.js server/news-photo.js server/local-ollama.js server/news-card.js server/editorial-discovery.js src/features/news-cover.js",
-    "test": "node --test tests/features.test.js tests/news-automation.test.js tests/editorial-session.test.js tests/drop-video.test.js tests/video-chat.test.js",
+    "test": "node --test tests/features.test.js tests/news-automation.test.js tests/editorial-session.test.js tests/drop-video.test.js tests/video-chat.test.js tests/chat-matching.test.js",
     "lint": "eslint server/editorial-discovery.js server/news-ai.js server/news-generation.js server/news-photo.js server/local-ollama.js server/news-card.js server/news-discover-handler.js api/editorial-discover.js api/news-generate.js api/news-discover.js api/news-card.js api/news-automation.js src/features/editorial-admin.js src/features/editorial-news.js src/features/news-cover.js tests/news-automation.test.js vite.config.js"
   },
   "dependencies": {

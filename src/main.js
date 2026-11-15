@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import '@fontsource/anton/latin-400.css'
 import '@fontsource/anton/latin-ext-400.css'
 import './style.css'
+import { selectCompatiblePairs } from './chat-matching.js'
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
@@ -29,9 +30,12 @@ if (!sessionId) {
   sessionStorage.setItem(sessionKey, sessionId)
 }
 
+const genderSelectionEnabled = new URLSearchParams(window.location.search).get('match') === 'gender'
+let selectedGender = null
+let lookingForGender = null
 let roomId = null
 let channel = null
-let state = 'searching'
+let state = genderSelectionEnabled ? 'choosing' : 'searching'
 let isStopping = false
 let partnerPresent = false
 let messages = []
@@ -272,7 +276,9 @@ function renderHome() {
 function renderChat() {
   const statusText = state === 'searching'
     ? 'Čakám na človeka...'
-    : state === 'connected'
+    : state === 'choosing'
+      ? 'Nastav si spojenie'
+      : state === 'connected'
       ? 'Pripojený'
       : 'Cudzí človek odišiel.'
 
@@ -297,12 +303,33 @@ function renderChat() {
           <span class="online-badge chat-online-badge" aria-live="polite"><span class="online-dot" aria-hidden="true"></span><span><strong class="online-count">${onlineCount}</strong> online</span></span>
         </div>
 
+        ${genderSelectionEnabled && state === 'choosing' ? `<section class="gender-preference-preview" aria-label="Nastavenie anonymného spojenia">
+          <div class="gender-preference-copy"><span class="gender-eyebrow">IBA PRE TOTO SPOJENIE</span><strong>Vyber si, s kým sa chceš spojiť</strong></div>
+          <div class="gender-selection-row">
+            <span class="gender-selection-label">Som</span>
+            <div class="gender-preference-options" role="group" aria-label="Vyber svoje pohlavie">
+              <button type="button" data-chat-gender="guy" aria-pressed="false">Chalan</button>
+              <button type="button" data-chat-gender="girl" aria-pressed="false">Baba</button>
+              <button type="button" data-chat-gender="any" aria-pressed="false">Nepoviem</button>
+            </div>
+          </div>
+          <div class="gender-selection-row">
+            <span class="gender-selection-label">Hľadám</span>
+            <div class="gender-preference-options" role="group" aria-label="Vyber koho chceš stretnúť">
+              <button type="button" data-chat-looking="guy" aria-pressed="false">Chalana</button>
+              <button type="button" data-chat-looking="girl" aria-pressed="false">Babu</button>
+              <button type="button" data-chat-looking="random" aria-pressed="false">Náhodne</button>
+            </div>
+          </div>
+          <p class="gender-preference-note" data-gender-note>Chat ostáva otvorený. Výber platí iba pre toto spojenie.</p>
+        </section>` : ''}
+
         <div id="messages" class="transcript ${messages.length || partnerTyping ? '' : 'is-empty'}" aria-live="polite">
           ${transcriptTemplate()}
         </div>
 
         <div class="controls">
-          <button id="next" class="next-btn" type="button">ĎALŠÍ</button>
+          <button id="next" class="next-btn" type="button" ${genderSelectionEnabled && state === 'choosing' ? 'disabled' : ''}>${genderSelectionEnabled && state === 'choosing' ? 'HĽADAŤ' : 'ĎALŠÍ'}</button>
 
           <form id="composer" class="composer">
             <label class="sr-only" for="message">Správa</label>
@@ -311,7 +338,7 @@ function renderChat() {
               maxlength="1000"
               rows="1"
               autocomplete="off"
-              placeholder="${state === 'connected' ? 'Napíš správu...' : 'Počkaj na pripojenie...'}"
+              placeholder="${state === 'connected' ? 'Napíš správu...' : state === 'choosing' ? 'Vyber si najprv možnosť...' : 'Počkaj na pripojenie...'}"
               ${state === 'connected' ? '' : 'disabled'}
             ></textarea>
             <button class="send-btn" type="submit" ${state === 'connected' ? '' : 'disabled'}>ODOSLAŤ</button>
@@ -324,7 +351,35 @@ function renderChat() {
 
   document.querySelector('#leave').addEventListener('click', leaveChat)
   document.querySelector('#brandHome')?.addEventListener('click', leaveChat)
-  document.querySelector('#next').addEventListener('click', nextChat)
+  if (genderSelectionEnabled && state === 'choosing') {
+    const updateChoiceGroup = (selector, chosenValue, attribute) => {
+      document.querySelectorAll(selector).forEach(option => {
+        const selected = option.getAttribute(attribute) === chosenValue
+        option.setAttribute('aria-pressed', String(selected))
+        option.classList.toggle('selected', selected)
+      })
+      const ready = Boolean(selectedGender && lookingForGender)
+      document.querySelector('#next').disabled = !ready
+      document.querySelector('[data-gender-note]').textContent = ready
+        ? `Vybrané: ${selectedGender === 'guy' ? 'chalan' : selectedGender === 'girl' ? 'baba' : 'nepoviem'} · hľadám ${lookingForGender === 'guy' ? 'chalana' : lookingForGender === 'girl' ? 'babu' : 'náhodne'}`
+        : 'Chat ostáva otvorený. Výber platí iba pre toto spojenie.'
+    }
+    document.querySelectorAll('[data-chat-gender]').forEach(button => {
+      button.addEventListener('click', () => {
+        selectedGender = button.dataset.chatGender
+        updateChoiceGroup('[data-chat-gender]', selectedGender, 'data-chat-gender')
+      })
+    })
+    document.querySelectorAll('[data-chat-looking]').forEach(button => {
+      button.addEventListener('click', () => {
+        lookingForGender = button.dataset.chatLooking
+        updateChoiceGroup('[data-chat-looking]', lookingForGender, 'data-chat-looking')
+      })
+    })
+    document.querySelector('#next').addEventListener('click', startChat)
+  } else {
+    document.querySelector('#next').addEventListener('click', nextChat)
+  }
   document.querySelector('#composer').addEventListener('submit', sendMessage)
   bindThemeButtons()
 
@@ -350,6 +405,14 @@ function renderChat() {
 }
 
 function emptyTranscript() {
+  if (state === 'choosing') {
+    return `
+      <div class="system-message">
+        <strong>Chat zostáva otvorený.</strong>
+        <span>Najprv si vyber, koho chceš stretnúť.</span>
+      </div>`
+  }
+
   if (state === 'searching') {
     return `
       <div class="system-message">
@@ -527,6 +590,8 @@ async function findPartner() {
           await lobbyChannel?.track({
             session_id: sessionId,
             status: 'waiting',
+            gender: selectedGender || 'any',
+            looking_for: lookingForGender || 'random',
             waiting_since: new Date().toISOString()
           })
         } catch (error) {
@@ -542,23 +607,18 @@ async function findPartner() {
 function tryPairFromLobby() {
   if (state !== 'searching' || isStopping || pairingInProgress || lobbyOfferSent || !lobbyChannel) return
   const presence = lobbyChannel.presenceState()
-  const waiting = [...new Set(Object.entries(presence)
+  const waiting = Object.entries(presence)
     .filter(([, metas]) => metas.some(meta => meta.status === 'waiting'))
-    .map(([key]) => key))].sort()
-  const index = waiting.indexOf(sessionId)
-  if (index < 0 || waiting.length < 2) return
-
-  const pairStart = Math.floor(index / 2) * 2
-  const first = waiting[pairStart]
-  const second = waiting[pairStart + 1]
-  if (!first || !second) return
-  if (first !== sessionId) return
+    .map(([key, metas]) => ({ key, meta: metas[metas.length - 1] || {} }))
+  const pair = selectCompatiblePairs(waiting).find(([first]) => first.key === sessionId)
+  if (!pair) return
+  const [first, second] = pair
   lobbyOfferSent = true
-  const room = [first, second].sort()
+  const room = [first.key, second.key].sort()
   void lobbyChannel.send({
     type: 'broadcast',
     event: 'pair-offer',
-    payload: { initiator: first, partner: second, room_id: `${room[0]}-${room[1]}` }
+    payload: { initiator: first.key, partner: second.key, room_id: `${room[0]}-${room[1]}` }
   }).then(response => {
     if (response !== 'ok') {
       lobbyOfferSent = false
@@ -809,5 +869,5 @@ if (window.visualViewport) {
 }
 
 render()
-startChat()
+if (!genderSelectionEnabled) startChat()
 setupOnlinePresence()
