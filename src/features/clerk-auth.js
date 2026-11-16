@@ -1,4 +1,41 @@
 let clerkPromise
+let clerkUiPromise
+
+function loadClerkUi(publishableKey) {
+  if (window.__internal_ClerkUICtor) return Promise.resolve(window.__internal_ClerkUICtor)
+  if (clerkUiPromise) return clerkUiPromise
+
+  clerkUiPromise = new Promise((resolve, reject) => {
+    let frontendApi
+    try {
+      const encodedFrontendApi = publishableKey.split('_')[2]
+      const decodedFrontendApi = atob(encodedFrontendApi)
+      if (!decodedFrontendApi.endsWith('$')) throw new Error('Invalid Clerk frontend API')
+      frontendApi = decodedFrontendApi.slice(0, -1)
+      if (!/^[a-z0-9.-]+$/i.test(frontendApi)) throw new Error('Invalid Clerk frontend API')
+    } catch {
+      reject(new Error('Clerk kľúč neobsahuje platnú adresu Frontend API. Skontroluj VITE_CLERK_PUBLISHABLE_KEY.'))
+      return
+    }
+
+    const script = document.createElement('script')
+    script.src = `https://${frontendApi}/npm/@clerk/ui@1/dist/ui.browser.js`
+    script.async = true
+    script.crossOrigin = 'anonymous'
+    script.dataset.clerkUi = 'true'
+    script.onload = () => {
+      if (window.__internal_ClerkUICtor) resolve(window.__internal_ClerkUICtor)
+      else reject(new Error('Clerk UI sa načítalo, ale bezpečnostná výzva nie je dostupná. Obnov stránku a skús znova.'))
+    }
+    script.onerror = () => reject(new Error('Nepodarilo sa načítať bezpečnostnú kontrolu Clerk-u. Skontroluj pripojenie a skús znova.'))
+    document.head.appendChild(script)
+  }).catch(error => {
+    clerkUiPromise = null
+    throw error
+  })
+
+  return clerkUiPromise
+}
 
 export async function getClerk() {
   if (clerkPromise) return clerkPromise
@@ -12,8 +49,9 @@ export async function getClerk() {
   }
   clerkPromise = (async () => {
     const { Clerk } = await import('@clerk/clerk-js')
+    const ClerkUI = await loadClerkUi(publishableKey)
     const clerk = new Clerk(publishableKey)
-    await clerk.load()
+    await clerk.load({ ui: { ClerkUI } })
     const callbackParams = new URLSearchParams(location.search)
     if (['__clerk_status', '__clerk_ticket', '__clerk_created_session', '__clerk_handshake'].some(key => callbackParams.has(key))) {
       await clerk.handleRedirectCallback({ signInUrl: '/account', signUpUrl: '/account', signInFallbackRedirectUrl: '/account', signUpFallbackRedirectUrl: '/account' })
