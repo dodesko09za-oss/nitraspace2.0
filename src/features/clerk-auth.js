@@ -2,8 +2,14 @@ let clerkPromise
 
 export async function getClerk() {
   if (clerkPromise) return clerkPromise
-  const publishableKey = import.meta.env?.VITE_CLERK_PUBLISHABLE_KEY
+  const publishableKey = String(import.meta.env?.VITE_CLERK_PUBLISHABLE_KEY || '').trim()
   if (!publishableKey) throw new Error('Clerk ešte nie je pripojený k tejto verzii. Pridaj VITE_CLERK_PUBLISHABLE_KEY do prostredia aplikácie.')
+  if (!publishableKey.startsWith('pk_test_') && !publishableKey.startsWith('pk_live_')) {
+    throw new Error('Clerk nastavenie vo Verceli: VITE_CLERK_PUBLISHABLE_KEY musí obsahovať iba Publishable Key z Clerk Dashboardu.')
+  }
+  if (/\s|CLERK_SECRET_KEY\s*=|sk_(test|live)_/.test(publishableKey)) {
+    throw new Error('Clerk nastavenie vo Verceli: do VITE_CLERK_PUBLISHABLE_KEY skopíruj iba jeden verejný pk_live_ kľúč. Tajný sk_live_ kľúč patrí samostatne do CLERK_SECRET_KEY.')
+  }
   clerkPromise = (async () => {
     const { Clerk } = await import('@clerk/clerk-js')
     const clerk = new Clerk(publishableKey)

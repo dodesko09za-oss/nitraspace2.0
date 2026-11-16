@@ -23,7 +23,7 @@ function validNewProfile(value) {
   const username = String(value?.username || '').trim().toLowerCase()
   const birthDate = String(value?.birth_date || '').trim()
   if (!name || name.length > 50) throw new Error('Doplň meno (najviac 50 znakov).')
-  if (!/^[a-z0-9_]{3,24}$/.test(username)) throw new Error('Používateľské meno musí mať 3 až 24 malých písmen, číslic alebo podčiarkovníkov.')
+  if (!/^(?=.*[a-z_])[a-z0-9_]{4,24}$/.test(username)) throw new Error('Používateľské meno musí mať 4 až 24 znakov, aspoň jedno písmeno alebo podčiarkovník a môže obsahovať malé písmená, číslice a podčiarkovníky.')
   if (!/^\d{4}-\d{2}-\d{2}$/.test(birthDate) || Number.isNaN(Date.parse(`${birthDate}T00:00:00Z`))) throw new Error('Zadaj platný dátum narodenia.')
   const cutoff = new Date()
   cutoff.setUTCFullYear(cutoff.getUTCFullYear() - 16)

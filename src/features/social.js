@@ -112,6 +112,7 @@ content(`<section class="account-heading"><span>NITRA SPACE / NASTAVENIA</span><
 let authFlowMode='signin'
 const authError=error=>{
  const detail=typeof error==='string'?error:error?.errors?.map(item=>item.longMessage||item.message).filter(Boolean).join(' ')||error?.longMessage||error?.message||''
+ if(detail.startsWith('Clerk nastavenie vo Verceli:'))return detail
  if(/(?:sk|pk)_(?:test|live)_|CLERK_SECRET_KEY|publishableKey/i.test(detail))return 'Prihlasovanie sa nepodarilo načítať. Skús obnoviť stránku alebo to chvíľu počkaj.'
  return detail||'Prihlásenie sa nepodarilo.'
 }
@@ -138,7 +139,7 @@ function profileValues(form){
  const values=Object.fromEntries(new FormData(form))
  const name=String(values.display_name||'').trim(),username=String(values.username||'').trim().toLowerCase(),birth_date=String(values.birth_date||'')
  if(!name)throw new Error('Vyplň svoje meno.')
- if(!/^[a-z0-9_]{3,24}$/.test(username))throw new Error('Používateľské meno musí mať 3 až 24 malých písmen, číslic alebo podčiarkovníkov.')
+ if(!/^(?=.*[a-z_])[a-z0-9_]{4,24}$/.test(username))throw new Error('Používateľské meno musí mať 4 až 24 znakov, aspoň jedno písmeno alebo podčiarkovník a môže obsahovať malé písmená, číslice a podčiarkovníky.')
  const birth=new Date(`${birth_date}T00:00:00`),cutoff=new Date();cutoff.setFullYear(cutoff.getFullYear()-16)
  if(!birth_date||Number.isNaN(birth.getTime())||birth>cutoff)throw new Error('Komunitný účet je dostupný od 16 rokov.')
  return {display_name:name,username,birth_date}
@@ -157,8 +158,8 @@ function authForm(signup=false){
  const isConfigured=Boolean(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY)
  authWindow('NITRA SPACE / ÚČET',`<div class="auth-heading"><span class="auth-kicker">SVOJE MIESTO V NITRE</span><h2>${signup?'Vytvor si účet.':'Vitaj späť.'}</h2><p>${signup?'Vytvor si účet a buď súčasťou Nitra Space.':'Prihlás sa a pokračuj tam, kde si skončil.'}</p></div>
   <div class="auth-tabs" role="tablist" aria-label="Typ účtu"><button type="button" role="tab" aria-selected="${!signup}" class="${signup?'':'active'}" data-auth-switch="signin">Prihlásenie</button><button type="button" role="tab" aria-selected="${signup}" class="${signup?'active':''}" data-auth-switch="signup">Nový účet</button></div>
-  ${state.clerkError?`<p class="auth-message error" role="alert">${html(authError(state.clerkError))}</p>`:''}
-  <form class="auth-fields" data-clerk-auth>${signup?`<div class="auth-field-grid"><label>Meno<input name="display_name" required maxlength="50" autocomplete="name" placeholder="Tvoje meno"></label><label>Používateľské meno<input name="username" required minlength="3" maxlength="24" pattern="[a-z0-9_]{3,24}" autocomplete="username" placeholder="napr. dodo_nitra"></label></div><label>Dátum narodenia <span class="auth-hint">Účet je dostupný od 16 rokov</span><input name="birth_date" type="date" required autocomplete="bday"></label>`:''}<label>E-mail<input name="email" type="email" required autocomplete="email" placeholder="ty@email.sk"></label><label class="auth-password-label"><span>Heslo</span>${signup?'':`<button type="button" class="auth-text-button" data-reset-password>Zabudol si heslo?</button>`}<span class="auth-password-wrap"><input name="password" type="password" required minlength="8" autocomplete="${signup?'new-password':'current-password'}" placeholder="${signup?'Aspoň 8 znakov':'Tvoje heslo'}"><button type="button" data-password-toggle aria-label="Zobraziť heslo">Zobraziť</button></span></label><p class="auth-message error" data-auth-message role="alert" aria-live="polite"></p><button class="auth-submit" type="submit" ${isConfigured?'':'disabled'}>${signup?'Vytvoriť účet':'Prihlásiť sa'} <span aria-hidden="true">↗</span></button></form>
+   ${state.clerkError?`<p class="auth-message error" role="alert">${html(authError(state.clerkError))}</p>`:!isConfigured?'<p class="auth-message error" role="alert">Chýba VITE_CLERK_PUBLISHABLE_KEY. Pridaj Clerk Publishable Key do lokálneho .env a reštartuj Vite.</p>':''}
+  <form class="auth-fields" data-clerk-auth>${signup?`<div class="auth-field-grid"><label>Meno<input name="display_name" required maxlength="50" autocomplete="name" placeholder="Tvoje meno"></label><label>Používateľské meno<input name="username" required minlength="4" maxlength="24" pattern="(?=.*[a-z_])[a-z0-9_]{4,24}" autocomplete="username" placeholder="napr. dodo_nitra"></label></div><label>Dátum narodenia <span class="auth-hint">Účet je dostupný od 16 rokov</span><input name="birth_date" type="date" required autocomplete="bday"></label>`:''}<label>E-mail<input name="email" type="email" required autocomplete="email" placeholder="ty@email.sk"></label><label class="auth-password-label"><span>Heslo</span>${signup?'':`<button type="button" class="auth-text-button" data-reset-password>Zabudol si heslo?</button>`}<span class="auth-password-wrap"><input name="password" type="password" required minlength="8" autocomplete="${signup?'new-password':'current-password'}" placeholder="${signup?'Aspoň 8 znakov':'Tvoje heslo'}"><button type="button" data-password-toggle aria-label="Zobraziť heslo">Zobraziť</button></span></label><p class="auth-message error" data-auth-message role="alert" aria-live="polite"></p><button class="auth-submit" type="submit" ${isConfigured?'':'disabled'}>${signup?'Vytvoriť účet':'Prihlásiť sa'} <span aria-hidden="true">↗</span></button></form>
   <div class="auth-divider"><span>alebo</span></div><button class="auth-google" type="button" data-google-auth ${isConfigured?'':'disabled'}><b aria-hidden="true">G</b> Pokračovať cez Google</button><p class="auth-footnote">Zabezpečené prihlásenie cez Clerk · Nitra Space</p>`)
  document.querySelectorAll('[data-auth-switch]').forEach(button=>button.onclick=()=>navigate(button.dataset.authSwitch==='signup'?'/account#signup':'/account'))
  const form=document.querySelector('[data-clerk-auth]'),message=form.querySelector('[data-auth-message]'),submit=form.querySelector('[type=submit]')
@@ -168,12 +169,14 @@ function authForm(signup=false){
   try{
    const values=Object.fromEntries(new FormData(form)),clerk=await getClerk()
    if(signup){
-    const profile=profileValues(form),flow=clerk.client.signUp.__internal_future
-    throwClerkError(await flow.password({emailAddress:values.email.trim(),password:values.password,unsafeMetadata:{nitra_profile:profile}}))
+     const profile=profileValues(form),flow=clerk.client.signUp.__internal_future
+     const [firstName,...lastNameParts]=profile.display_name.split(/\s+/)
+     const lastName=lastNameParts.join(' ')
+     throwClerkError(await flow.password({emailAddress:values.email.trim(),password:values.password,username:profile.username,firstName,...(lastName?{lastName}:{}),unsafeMetadata:{nitra_profile:profile}}))
     throwClerkError(await flow.verifications.sendEmailCode())
     verificationForm('Potvrď svoj e-mail.',values.email,async code=>{
      throwClerkError(await flow.verifications.verifyEmailCode({code}))
-     if(flow.status!=='complete')throw new Error('Clerk ešte potrebuje ďalší krok prihlásenia.')
+      if(flow.status!=='complete'){const missing=(flow.missingFields||[]).map(field=>({username:'používateľské meno',email_address:'e-mail',password:'heslo',first_name:'meno',last_name:'priezvisko'}[field]||field)).join(', ');throw new Error(missing?`Clerk ešte vyžaduje: ${missing}.`:'Clerk ešte potrebuje ďalší krok prihlásenia.')}
      throwClerkError(await flow.finalize())
      await finishClerkLogin()
     })
@@ -209,7 +212,7 @@ function verificationForm(title,email,onVerify){
 }
 function clerkProfileForm(){
  const email=state.clerkUser?.primaryEmailAddress?.emailAddress||state.clerkUser?.emailAddresses?.find(item=>item.id===state.clerkUser?.primaryEmailAddressId)?.emailAddress||''
- authWindow('NITRA SPACE / DOKONČENIE PROFILU',`<div class="auth-heading"><span class="auth-kicker">POSLEDNÝ KROK</span><h2>Ešte pár údajov.</h2><p>Tvoje staré správy a dáta zostanú zachované.</p></div><form class="auth-fields" data-clerk-profile><label>Meno<input name="display_name" required maxlength="50" autocomplete="name" placeholder="Tvoje meno"></label><label>Používateľské meno<input name="username" required minlength="3" maxlength="24" pattern="[a-z0-9_]{3,24}" autocomplete="username" placeholder="napr. dodo_nitra"></label><label>Dátum narodenia <span class="auth-hint">Účet je dostupný od 16 rokov</span><input name="birth_date" type="date" required autocomplete="bday"></label><label>E-mail<input type="email" value="${html(email)}" disabled></label><p class="auth-message error" data-auth-message role="alert"></p><button class="auth-submit" type="submit">Pokračovať <span aria-hidden="true">↗</span></button></form>`)
+  authWindow('NITRA SPACE / DOKONČENIE PROFILU',`<div class="auth-heading"><span class="auth-kicker">POSLEDNÝ KROK</span><h2>Ešte pár údajov.</h2><p>Tvoje staré správy a dáta zostanú zachované.</p></div><form class="auth-fields" data-clerk-profile><label>Meno<input name="display_name" required maxlength="50" autocomplete="name" placeholder="Tvoje meno"></label><label>Používateľské meno<input name="username" required minlength="4" maxlength="24" pattern="(?=.*[a-z_])[a-z0-9_]{4,24}" autocomplete="username" placeholder="napr. dodo_nitra"></label><label>Dátum narodenia <span class="auth-hint">Účet je dostupný od 16 rokov</span><input name="birth_date" type="date" required autocomplete="bday"></label><label>E-mail<input type="email" value="${html(email)}" disabled></label><p class="auth-message error" data-auth-message role="alert"></p><button class="auth-submit" type="submit">Pokračovať <span aria-hidden="true">↗</span></button></form>`)
  const form=document.querySelector('[data-clerk-profile]'),message=form.querySelector('[data-auth-message]'),button=form.querySelector('[type=submit]')
  form.onsubmit=async event=>{event.preventDefault();button.disabled=true;message.textContent='';try{await finishClerkLogin(profileValues(form))}catch(error){message.textContent=authError(error);button.disabled=false}}
 }
