@@ -82,13 +82,30 @@ export async function syncClerkSessionToSupabase(db, profile = null) {
   if (!response.ok || !result.token_hash) throw new Error(result.error || `Prepojenie účtu zlyhalo (${response.status}).`)
   const exchange = await db.auth.verifyOtp({ token_hash: result.token_hash, type: 'magiclink' })
   if (exchange.error) throw exchange.error
-  if (!exchange.data.user || exchange.data.user.id !== result.user_id) throw new Error('Supabase vrátil iný účet. Pre istotu sa odhlás a prihlás znova.')
+  if (!exchange.data.user || exchange.data.user.id !== result.user_id) {
+    await db.auth.signOut({ scope: 'local' })
+    throw new Error('Supabase vrátil iný účet. Prihlás sa znova.')
+  }
   return { user: exchange.data.user, profileRequired: false, clerkUser: clerk.user }
 }
 
 export async function signOutClerk() {
+  if (!clerkPublishableKeyExists()) return
   const clerk = await getClerk()
-  if (clerk.user) await clerk.signOut()
+  if (clerk.session) await clerk.signOut()
+}
+
+export async function signOutAccount(db) {
+  const results = await Promise.allSettled([
+    signOutClerk(),
+    (async () => {
+      const { error } = await db.auth.signOut({ scope: 'global' })
+      if (error) throw error
+    })(),
+  ])
+  if (results.some(result => result.status === 'rejected')) {
+    throw new Error('Odhlásenie sa nedokončilo. Skús to znova.')
+  }
 }
 
 export function clerkPublishableKeyExists() {

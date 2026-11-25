@@ -1,4 +1,4 @@
-import { getClerk, signOutClerk, syncClerkSessionToSupabase } from './features/clerk-auth.js'
+import { getClerk, signOutAccount, syncClerkSessionToSupabase } from './features/clerk-auth.js'
 
 /**
  * Data bridge for the Nitra Space app. Pass the existing Supabase client once.
@@ -211,8 +211,7 @@ export function createPreviewData(client) {
       if (result?.error) throw result.error
     },
     async signOut() {
-      try { await signOutClerk() } catch {}
-      unwrap(await configured().auth.signOut())
+      await signOutAccount(configured())
     },
     async updateProfile({ name, username, bio, interests, discoverable, showOnline }) {
       const user = await requireUser()

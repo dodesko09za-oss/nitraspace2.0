@@ -39,3 +39,16 @@ migration is required for this bridge.
 The Supabase native Third-Party Auth integration is intentionally not enabled
 for this schema: its Clerk `sub` would make `auth.uid()` a non-UUID value and
 would break existing foreign keys and policies.
+
+## Account deletion
+
+Set `CLERK_SECRET_KEY` in Supabase Edge Function secrets as well as Vercel,
+then deploy the updated `delete-account` function. Both deployments must use
+the same Clerk instance. Set `APP_ORIGIN` in Supabase for an additional frontend
+origin when needed.
+
+For linked accounts, deletion checks that the Supabase and Clerk sessions refer
+to the same person, removes the Clerk identity, then deletes the Supabase user.
+If Supabase deletion fails after Clerk deletion, the request can be retried
+with the existing Supabase session. Clerk's user-not-found response lets the
+function finish the Supabase deletion.

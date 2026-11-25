@@ -1,8 +1,8 @@
 import {html} from './shared.js'
-import {clerkPublishableKeyExists,getClerk,signOutClerk,syncClerkSessionToSupabase} from './clerk-auth.js'
+import {clerkPublishableKeyExists,getClerk,signOutAccount,syncClerkSessionToSupabase} from './clerk-auth.js'
 export let db
 export const state={user:null,admin:false,generation:0,needsProfile:false,clerkUser:null,clerkError:null}
-let navigateHost=()=>{},cleanups=[],initialised=false
+let navigateHost=()=>{},cleanups=[],initialised=false,signingOut=false
 export function content(markup){const el=document.querySelector('#feature-content');if(el)el.innerHTML=markup}
 export function notice(message){const el=document.querySelector('#feature-notice');if(el)el.textContent=message}
 export function navigate(url){navigateHost(url)}
@@ -12,38 +12,54 @@ export async function requireUser(){if(state.user)return true;navigate('/account
 async function refreshAdmin(){state.admin=false;const id=state.user?.id;if(id){const r=await db.rpc('is_admin');if(state.user?.id===id)state.admin=r.data===true}}
 function announceAuth(){window.dispatchEvent(new Event('nitra-auth-change'))}
 export async function signOut(destination='/news'){
-  const results=await Promise.allSettled([signOutClerk(),db?.auth.signOut({scope:'local'})])
-  state.user=null;state.admin=false;state.needsProfile=false;state.clerkUser=null;state.clerkError=null;announceAuth();navigate(typeof destination==='string'?destination:'/news')
-  const failure=results.find(result=>result.status==='rejected')
-  if(failure)notice(failure.reason?.message||'Odhlásenie sa nedokončilo úplne.')
+  if(signingOut)return
+  signingOut=true
+  try{
+    await signOutAccount(db)
+    state.user=null;state.admin=false;state.needsProfile=false;state.clerkUser=null;state.clerkError=null
+    announceAuth();navigate(typeof destination==='string'?destination:'/news')
+  }catch(error){
+    state.user=null;state.admin=false;state.clerkUser=null
+    notice(error.message)
+  }finally{
+    signingOut=false
+  }
 }
 export async function initialise(client,go){
   db=client;navigateHost=go;if(initialised||!db)return;initialised=true
-  const session=await db.auth.getSession()
-  state.user=session.data.session?.user||null
+  state.user=null
   if(clerkPublishableKeyExists()){
     try{
       const clerk=await getClerk()
       state.clerkUser=clerk.user||null
-      if(clerk.user){
-        state.user=null
+      if(clerk.user&&clerk.session){
         const linked=await syncClerkSessionToSupabase(db)
         state.needsProfile=linked.profileRequired
         state.clerkUser=linked.clerkUser||clerk.user
         state.user=linked.user
-      }else{
+      }
+      if(!state.user){
         // Once Clerk is enabled, an old standalone Supabase session must not
         // remain a way around the new sign-in requirement.
-        state.user=null
-        await db.auth.signOut({scope:'local'})
+        const {error}=await db.auth.signOut({scope:'local'})
+        if(error)throw error
       }
-    }catch(error){state.clerkError=error?.message||'Clerk prihlásenie sa nepodarilo obnoviť.'}
+    }catch(error){
+      state.clerkError=error?.message||'Clerk prihlásenie sa nepodarilo obnoviť.'
+      try{await db.auth.signOut({scope:'local'})}catch{}
+    }
+  }else{
+    const session=await db.auth.getSession()
+    state.user=session.data.session?.user||null
   }
   await refreshAdmin(); announceAuth()
   // Auth callbacks run while the session lock is held. Database requests
   // acquire that same lock, so defer them until the callback has returned.
   db.auth.onAuthStateChange((_event,next)=>{
-    state.user=next?.user||null
+    if(signingOut)return
+    const user=next?.user
+    const linked=state.clerkUser&&user?.app_metadata?.auth_provider==='clerk'&&user.app_metadata.clerk_user_id===state.clerkUser.id
+    state.user=user&&(!clerkPublishableKeyExists()||(!state.clerkError&&linked))?user:null
     if(!state.user)state.admin=false
     setTimeout(()=>{refreshAdmin().then(announceAuth).catch(()=>{state.admin=false;announceAuth()})},0)
   })

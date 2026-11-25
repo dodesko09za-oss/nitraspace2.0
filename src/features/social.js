@@ -112,10 +112,19 @@ content(`<section class="account-heading"><span>NITRA SPACE / NASTAVENIA</span><
   document.querySelector('[data-delete-account]').onclick=async e=>{
     const phrase=prompt('Táto akcia je trvalá. Pre potvrdenie napíš VYMAZAŤ.')
     if(phrase!=='VYMAZAŤ')return
-    e.currentTarget.disabled=true
-    const {error}=await db.functions.invoke('delete-account')
-    if(error){notice('Účet sa nepodarilo vymazať. Skús to neskôr.');e.currentTarget.disabled=false;return}
-    await signOut()
+    const button=e.currentTarget
+    button.disabled=true
+    try{
+      const clerk=state.user.app_metadata?.auth_provider==='clerk'?await getClerk():null
+      const clerkToken=await clerk?.session?.getToken()
+      const {error}=await db.functions.invoke('delete-account',{body:{clerkToken}})
+      if(error)throw error
+      await signOut()
+    }catch{
+      notice('Vymazanie účtu sa nedokončilo. Skús to znova.')
+    }finally{
+      button.disabled=false
+    }
   }
   document.querySelectorAll('[data-unblock]').forEach(b=>b.onclick=async()=>{const {error}=await db.rpc('unblock_user',{p_blocked:b.dataset.unblock});if(error)notice(error.message);else account()})
 }
