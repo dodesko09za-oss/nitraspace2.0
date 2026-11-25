@@ -85,7 +85,7 @@ export async function renderDrops() {
     const list = visible();
     if (!list.some((r) => r.id === selected?.id)) selected = list[0] || null;
     content(
-      `<section class="drops"><div class="drops-atmosphere" aria-hidden="true"><img src="/chrome-sculpture.png" alt=""><img src="/chrome-sculpture.png" alt=""></div><div class="drops-top"><span>/ O D K A Z Y</span>${adminPanel ? '<input data-drop-search aria-label="Hľadať odkazy" placeholder="Hľadať odkazy…" value="' + html(query) + '">' : ""}</div><div class="drops-heading"><div><h1>${adminPanel ? "TVOJE ODKAZY." : "KOHO HĽADÁŠ<br>V NITRE?"}</h1><p>ANONYMNE. SKUTOČNE. Z NITRY.</p></div><small>NITRA<br>ŽIJE<br>ONLINE.<i></i></small></div>${
+      `<section class="drops"><div class="drops-atmosphere" aria-hidden="true"><img src="/chrome-sculpture-optimized.webp" alt=""><img src="/chrome-sculpture-optimized.webp" alt=""></div><div class="drops-top"><span>/ O D K A Z Y</span>${adminPanel ? '<input data-drop-search aria-label="Hľadať odkazy" placeholder="Hľadať odkazy…" value="' + html(query) + '">' : ""}</div><div class="drops-heading"><div><h1>${adminPanel ? "TVOJE ODKAZY." : "KOHO HĽADÁŠ<br>V NITRE?"}</h1><p>ANONYMNE. SKUTOČNE. Z NITRY.</p></div><small>NITRA<br>ŽIJE<br>ONLINE.<i></i></small></div>${
         adminPanel
           ? `<div class="drops-tabs">${Object.entries(labels)
               .map(
@@ -94,7 +94,7 @@ export async function renderDrops() {
               )
               .join(
                 "",
-              )}<button data-new-drop>＋ Nový drop</button></div><div class="drops-layout"><div class="drops-list">${list.map((r) => `<button data-drop-id="${r.id}" class="${selected?.id === r.id ? "active" : ""}"><span>${html(r.body)}</span><small>${new Date(r.created_at).toLocaleString("sk-SK", { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" })}</small><i class="${r.status === "unread" ? "unread" : ""}"></i></button>`).join("") || '<p class="drops-empty">Zatiaľ žiadne odkazy.</p>'}</div><div class="drops-detail">${selected ? `<div class="drop-stage style-${selected.style}"><span class="drop-position">${list.indexOf(selected) + 1} / ${list.length}</span><img class="drop-ornament top" src="/chrome-sculpture.png" alt=""><img class="drop-ornament bottom" src="/chrome-sculpture.png" alt=""><div class="drop-glass"><strong>NITRA<br>SPACE</strong><p>${html(selected.body)}</p>${selected.reply ? `<div class="drop-reply">${html(selected.reply)}</div>` : ""}<i></i></div><div class="drop-signature">ONE CITY.<br>ONE SPACE.<i></i></div></div><p class="drop-style-label">ŠTÝL DROPU</p><div class="drop-styles">${styles.map((s) => `<button data-drop-style="${s}" aria-pressed="${s === selected.style}"><img src="/chrome-sculpture.png" alt=""><span>${s[0].toUpperCase() + s.slice(1)}</span></button>`).join("")}</div><div class="drop-actions"><button class="drop-primary" data-drop-export>↓ Stiahnuť obrázok</button><button data-drop-share>Zdieľať</button><button data-drop-archive>${selected.status === "archived" ? "Obnoviť" : "Archivovať"}</button></div><form data-drop-reply><label>Odpoveď<textarea name="reply" maxlength="1200" placeholder="Napíš odpoveď…">${html(selected.reply)}</textarea></label><button type="submit">Uložiť odpoveď</button></form>` : '<div class="drop-stage empty-stage"><strong>NITRA<br>SPACE</strong><p>Prvý odkaz sa tu objaví po odoslaní.</p></div>'}</div></div>`
+              )}<button data-new-drop>＋ Nový drop</button></div><div class="drops-layout"><div class="drops-list">${list.map((r) => `<button data-drop-id="${r.id}" class="${selected?.id === r.id ? "active" : ""}"><span>${html(r.body)}</span><small>${new Date(r.created_at).toLocaleString("sk-SK", { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" })}</small><i class="${r.status === "unread" ? "unread" : ""}"></i></button>`).join("") || '<p class="drops-empty">Zatiaľ žiadne odkazy.</p>'}</div><div class="drops-detail">${selected ? `<div class="drop-stage style-${selected.style}"><span class="drop-position">${list.indexOf(selected) + 1} / ${list.length}</span><img class="drop-ornament top" src="/chrome-sculpture-optimized.webp" alt=""><img class="drop-ornament bottom" src="/chrome-sculpture-optimized.webp" alt=""><div class="drop-glass"><strong>NITRA<br>SPACE</strong><p>${html(selected.body)}</p>${selected.reply ? `<div class="drop-reply">${html(selected.reply)}</div>` : ""}<i></i></div><div class="drop-signature">ONE CITY.<br>ONE SPACE.<i></i></div></div><p class="drop-style-label">ŠTÝL DROPU</p><div class="drop-styles">${styles.map((s) => `<button data-drop-style="${s}" aria-pressed="${s === selected.style}"><img src="/chrome-sculpture-optimized.webp" alt=""><span>${s[0].toUpperCase() + s.slice(1)}</span></button>`).join("")}</div><div class="drop-actions"><button class="drop-primary" data-drop-export>↓ Stiahnuť obrázok</button><button data-drop-share>Zdieľať</button><button data-drop-archive>${selected.status === "archived" ? "Obnoviť" : "Archivovať"}</button></div><form data-drop-reply><label>Odpoveď<textarea name="reply" maxlength="1200" placeholder="Napíš odpoveď…">${html(selected.reply)}</textarea></label><button type="submit">Uložiť odpoveď</button></form>` : '<div class="drop-stage empty-stage"><strong>NITRA<br>SPACE</strong><p>Prvý odkaz sa tu objaví po odoslaní.</p></div>'}</div></div>`
           : composer()
       }</section>`,
     );
@@ -103,7 +103,7 @@ export async function renderDrops() {
     );
     document.querySelector(".drop-stage:not(.empty-stage)")?.insertAdjacentHTML(
       "afterbegin",
-      '<img class="drop-ornament accent" src="/chrome-sculpture.png" alt="">',
+      '<img class="drop-ornament accent" src="/chrome-sculpture-optimized.webp" alt="">',
     );
     document
       .querySelector("[data-drop-search]")
@@ -315,7 +315,7 @@ async function exportDrop(drop, video = false, format = "story", onProgress = ()
     const canvas = document.createElement("canvas");
     canvas.width = layout.width; canvas.height = layout.height;
     const ctx = canvas.getContext("2d", { alpha: false }), image = new Image();
-    image.src = "/chrome-sculpture.png"; await image.decode();
+    image.src = "/chrome-sculpture-optimized.webp"; await image.decode();
     const chrome = document.createElement("canvas");
     chrome.width = image.naturalWidth; chrome.height = image.naturalHeight;
     const chromeCtx = chrome.getContext("2d");

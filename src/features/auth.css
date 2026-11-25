@@ -77,3 +77,147 @@
  .auth-secure{letter-spacing:.04em}
 }
 @media(prefers-reduced-motion:reduce){.auth-window *{transition:none!important;scroll-behavior:auto!important}}
+
+/* Account sign-in: white Win98-style panel matching the site's silver UI. */
+#chrome-app.account-auth-open{background:#f7f9fc!important;background-image:none!important}
+#chrome-app.account-auth-open::before,#chrome-app.account-auth-open::after{display:none!important}
+#chrome-app.account-auth-open .chrome,#chrome-app.account-auth-open .ornament{display:none!important}
+#chrome-app.account-auth-open main#main{background:transparent!important}
+#chrome-app.account-auth-open .editorial:has(.auth-window){width:100%;max-width:100%;min-height:calc(100svh - 132px);padding:clamp(18px,4vh,42px) 16px 36px;background:#f7f9fc}
+#chrome-app.account-auth-open .auth-window{display:block;width:min(100%,620px);max-width:620px;min-height:0;margin:0 auto 28px;overflow:hidden;border:2px outset #b4becb;border-radius:3px;background:#fff;box-shadow:inset 1px 1px #fff,inset -1px -1px #a6b0bd,2px 8px 24px #52627b2b}
+#chrome-app.account-auth-open .auth-visual{display:none!important}
+#chrome-app.account-auth-open .auth-content{display:flex;flex-direction:column;justify-content:center;min-width:0;padding:clamp(22px,4vw,38px);background:#fff;color:#202a39}
+#chrome-app.account-auth-open .auth-wordmark{display:block;width:104px;height:68px;object-fit:contain;align-self:center;margin:0 auto 12px;filter:brightness(.58) saturate(1.15) contrast(1.18)}
+#chrome-app.account-auth-open .auth-content-top{min-height:34px;justify-content:space-between;margin:0 calc(clamp(22px,4vw,38px)*-1) 26px;padding:7px 12px;border-top:1px solid #fff;border-bottom:1px solid #a8b3c2;background:linear-gradient(180deg,#eef2f7,#d6dde7);color:#233b60;font:700 10px/1.2 Tahoma,Arial,sans-serif;letter-spacing:.08em}
+#chrome-app.account-auth-open .auth-secure{color:#526071;font-size:9px;letter-spacing:.04em}
+#chrome-app.account-auth-open .auth-secure i{background:#39895d;box-shadow:0 0 0 2px #d8e7dc}
+#chrome-app.account-auth-open .auth-heading{margin-bottom:20px}
+#chrome-app.account-auth-open .auth-heading .auth-kicker{color:#315d9b}
+#chrome-app.account-auth-open .auth-heading h2{color:#192b49;font:400 clamp(34px,5vw,45px)/1.02 Anton,Impact,sans-serif;text-shadow:0 1px #fff,0 2px #aab5c3}
+#chrome-app.account-auth-open .auth-heading p,#chrome-app.account-auth-open .auth-step-copy{color:#526071}
+#chrome-app.account-auth-open .auth-heading p strong,#chrome-app.account-auth-open .auth-step-copy strong{color:#243b60}
+#chrome-app.account-auth-open .auth-tabs{gap:4px;margin-bottom:20px;padding:4px;border:2px inset #bac3ce;border-radius:3px;background:#e5e9ef;box-shadow:inset 1px 1px #a9b3c0}
+#chrome-app.account-auth-open .auth-tabs button{min-height:39px;border:1px solid transparent;border-radius:2px;color:#526071;font:700 12px Tahoma,Arial,sans-serif}
+#chrome-app.account-auth-open .auth-tabs button.active,#chrome-app.account-auth-open .auth-tabs button[aria-selected=true]{border:2px outset #fff;background:linear-gradient(#fff,#d5dfec);color:#1e3760;box-shadow:inset 1px 1px #fff,inset -1px -1px #9ba8ba}
+#chrome-app.account-auth-open .auth-fields{gap:13px}
+#chrome-app.account-auth-open .auth-fields>label,#chrome-app.account-auth-open .auth-field-grid>label{color:#344762;font:700 11px/1.4 Tahoma,Arial,sans-serif}
+#chrome-app.account-auth-open .auth-fields input{height:45px;padding:0 11px;border:2px inset #acb5c0;border-radius:2px;background:#fff;color:#182235;font:14px Tahoma,Arial,sans-serif;box-shadow:inset 1px 1px #929eae}
+#chrome-app.account-auth-open .auth-fields input::placeholder{color:#818b98}
+#chrome-app.account-auth-open .auth-fields input:focus{outline:2px solid #5377af;outline-offset:1px;border-color:#8798b0;box-shadow:inset 1px 1px #929eae}
+#chrome-app.account-auth-open .auth-fields input:disabled{background:#edf0f4;color:#677383}
+#chrome-app.account-auth-open .auth-password-wrap [data-password-toggle],#chrome-app.account-auth-open .auth-text-button{color:#315d9b;text-decoration-color:#8ca0bb}
+#chrome-app.account-auth-open .auth-hint{color:#718093}
+#chrome-app.account-auth-open .auth-message.error{color:#a52c35}
+#chrome-app.account-auth-open .auth-message.success{color:#287344}
+#chrome-app.account-auth-open .auth-divider{color:#718093}
+#chrome-app.account-auth-open .auth-divider:before,#chrome-app.account-auth-open .auth-divider:after{background:#c7cfda}
+#chrome-app.account-auth-open .auth-submit,#chrome-app.account-auth-open .auth-google{min-height:45px;border:2px outset #fff;border-radius:3px;background:linear-gradient(180deg,#fff 0%,#edf1f6 45%,#c4ccd7 100%);color:#1b2e4b;font:700 12px Tahoma,Arial,sans-serif;box-shadow:inset 1px 1px #fff,inset -1px -1px #9aa4b2,1px 1px #788391}
+#chrome-app.account-auth-open .auth-submit:hover:not(:disabled),#chrome-app.account-auth-open .auth-google:hover:not(:disabled){transform:none;filter:brightness(1.03)}
+#chrome-app.account-auth-open .auth-submit:active,#chrome-app.account-auth-open .auth-google:active{border-style:inset}
+#chrome-app.account-auth-open .auth-google{background:#fff;color:#263b5d}
+#chrome-app.account-auth-open .auth-google b{border:1px solid #b8c3d1;background:#fff;color:#34588b}
+#chrome-app.account-auth-open .auth-footnote{color:#718093}
+#chrome-app.account-auth-open .auth-progress i{background:#d2d9e3}
+#chrome-app.account-auth-open .auth-progress i.active{background:#315d9b;box-shadow:none}
+#chrome-app.account-auth-open .auth-inline-actions{margin-top:17px}
+@media(max-width:760px){#chrome-app.account-auth-open .editorial:has(.auth-window){min-height:calc(100svh - 121px);padding:16px 12px calc(92px + env(safe-area-inset-bottom))}#chrome-app.account-auth-open .auth-window{max-width:560px;margin-bottom:16px;border-radius:3px}#chrome-app.account-auth-open .auth-content{padding:20px 17px 22px}#chrome-app.account-auth-open .auth-content-top{margin:0 -17px 20px;padding-inline:9px;font-size:9px}#chrome-app.account-auth-open .auth-heading h2{font-size:38px}}
+
+/* Light retro account window: match the silver Windows-style panels in the app. */
+#chrome-app.account-auth-open{background:#f7f9fc!important;background-image:none!important}
+#chrome-app.account-auth-open::before,#chrome-app.account-auth-open::after{display:none!important}
+#chrome-app.account-auth-open .chrome,#chrome-app.account-auth-open .ornament{display:none!important}
+#chrome-app.account-auth-open main#main{background:transparent!important}
+#chrome-app.account-auth-open .editorial:has(.auth-window){width:100%;max-width:100%;min-height:calc(100svh - 132px);padding:clamp(18px,4vh,42px) 16px 36px;background:#f7f9fc}
+#chrome-app.account-auth-open .auth-window{display:block;width:min(100%,620px);max-width:620px;min-height:0;margin:0 auto 28px;overflow:hidden;border:2px outset #b4becb;border-radius:3px;background:#fff;box-shadow:inset 1px 1px #fff,inset -1px -1px #a6b0bd,2px 8px 24px #52627b2b}
+#chrome-app.account-auth-open .auth-visual{display:none!important}
+#chrome-app.account-auth-open .auth-content{display:flex;flex-direction:column;justify-content:center;min-width:0;padding:clamp(22px,4vw,38px);background:#fff;color:#202a39}
+#chrome-app.account-auth-open .auth-wordmark{display:block;width:104px;height:68px;object-fit:contain;align-self:center;margin:0 auto 12px;filter:brightness(.58) saturate(1.15) contrast(1.18)}
+#chrome-app.account-auth-open .auth-content-top{min-height:34px;justify-content:space-between;margin:0 calc(clamp(22px,4vw,38px)*-1) 26px;padding:7px 12px;border-top:1px solid #fff;border-bottom:1px solid #a8b3c2;background:linear-gradient(180deg,#eef2f7,#d6dde7);color:#233b60;font:700 10px/1.2 Tahoma,Arial,sans-serif;letter-spacing:.08em}
+#chrome-app.account-auth-open .auth-secure{color:#526071;font-size:9px;letter-spacing:.04em}
+#chrome-app.account-auth-open .auth-secure i{background:#39895d;box-shadow:0 0 0 2px #d8e7dc}
+#chrome-app.account-auth-open .auth-heading{margin-bottom:20px}
+#chrome-app.account-auth-open .auth-heading .auth-kicker{color:#315d9b}
+#chrome-app.account-auth-open .auth-heading h2{color:#192b49;font:400 clamp(34px,5vw,45px)/1.02 Anton,Impact,sans-serif;text-shadow:0 1px #fff,0 2px #aab5c3}
+#chrome-app.account-auth-open .auth-heading p,#chrome-app.account-auth-open .auth-step-copy{color:#526071}
+#chrome-app.account-auth-open .auth-heading p strong,#chrome-app.account-auth-open .auth-step-copy strong{color:#243b60}
+#chrome-app.account-auth-open .auth-tabs{gap:4px;margin-bottom:20px;padding:4px;border:2px inset #bac3ce;border-radius:3px;background:#e5e9ef;box-shadow:inset 1px 1px #a9b3c0}
+#chrome-app.account-auth-open .auth-tabs button{min-height:39px;border:1px solid transparent;border-radius:2px;color:#526071;font:700 12px Tahoma,Arial,sans-serif}
+#chrome-app.account-auth-open .auth-tabs button.active,#chrome-app.account-auth-open .auth-tabs button[aria-selected=true]{border:2px outset #fff;background:linear-gradient(#fff,#d5dfec);color:#1e3760;box-shadow:inset 1px 1px #fff,inset -1px -1px #9ba8ba}
+#chrome-app.account-auth-open .auth-fields{gap:13px}
+#chrome-app.account-auth-open .auth-fields>label,#chrome-app.account-auth-open .auth-field-grid>label{color:#344762;font:700 11px/1.4 Tahoma,Arial,sans-serif}
+#chrome-app.account-auth-open .auth-fields input{height:45px;padding:0 11px;border:2px inset #acb5c0;border-radius:2px;background:#fff;color:#182235;font:14px Tahoma,Arial,sans-serif;box-shadow:inset 1px 1px #929eae}
+#chrome-app.account-auth-open .auth-fields input::placeholder{color:#818b98}
+#chrome-app.account-auth-open .auth-fields input:focus{outline:2px solid #5377af;outline-offset:1px;border-color:#8798b0;box-shadow:inset 1px 1px #929eae}
+#chrome-app.account-auth-open .auth-fields input:disabled{background:#edf0f4;color:#677383}
+#chrome-app.account-auth-open .auth-password-wrap [data-password-toggle],#chrome-app.account-auth-open .auth-text-button{color:#315d9b;text-decoration-color:#8ca0bb}
+#chrome-app.account-auth-open .auth-hint{color:#718093}
+#chrome-app.account-auth-open .auth-message.error{color:#a52c35}
+#chrome-app.account-auth-open .auth-message.success{color:#287344}
+#chrome-app.account-auth-open .auth-divider{color:#718093}
+#chrome-app.account-auth-open .auth-divider:before,#chrome-app.account-auth-open .auth-divider:after{background:#c7cfda}
+#chrome-app.account-auth-open .auth-submit,#chrome-app.account-auth-open .auth-google{min-height:45px;border:2px outset #fff;border-radius:3px;background:linear-gradient(180deg,#fff 0%,#edf1f6 45%,#c4ccd7 100%);color:#1b2e4b;font:700 12px Tahoma,Arial,sans-serif;box-shadow:inset 1px 1px #fff,inset -1px -1px #9aa4b2,1px 1px #788391}
+#chrome-app.account-auth-open .auth-submit:hover:not(:disabled),#chrome-app.account-auth-open .auth-google:hover:not(:disabled){transform:none;filter:brightness(1.03)}
+#chrome-app.account-auth-open .auth-submit:active,#chrome-app.account-auth-open .auth-google:active{border-style:inset}
+#chrome-app.account-auth-open .auth-google{background:#fff;color:#263b5d}
+#chrome-app.account-auth-open .auth-google b{border:1px solid #b8c3d1;background:#fff;color:#34588b}
+#chrome-app.account-auth-open .auth-footnote{color:#718093}
+#chrome-app.account-auth-open .auth-progress i{background:#d2d9e3}
+#chrome-app.account-auth-open .auth-progress i.active{background:#315d9b;box-shadow:none}
+#chrome-app.account-auth-open .auth-inline-actions{margin-top:17px}
+@media(max-width:760px){#chrome-app.account-auth-open .editorial:has(.auth-window){min-height:calc(100svh - 121px);padding:16px 12px calc(92px + env(safe-area-inset-bottom))}#chrome-app.account-auth-open .auth-window{max-width:560px;margin-bottom:16px;border-radius:3px}#chrome-app.account-auth-open .auth-content{padding:20px 17px 22px}#chrome-app.account-auth-open .auth-content-top{margin:0 -17px 20px;padding-inline:9px;font-size:9px}#chrome-app.account-auth-open .auth-heading h2{font-size:38px}}
+
+/* Keep account tabs stable on touch and use an icon-only password reveal control. */
+#chrome-app.account-auth-open .auth-tabs button{transition:none!important;-webkit-tap-highlight-color:transparent;background:linear-gradient(#fff,#e6ebf2)!important;color:#526071!important}
+#chrome-app.account-auth-open .auth-tabs button.active,
+#chrome-app.account-auth-open .auth-tabs button[aria-selected=true],
+#chrome-app.account-auth-open .auth-tabs button:active{background:linear-gradient(#fff,#d5dfec)!important;color:#1e3760!important}
+#chrome-app.account-auth-open .auth-password-wrap input{padding-right:48px!important}
+#chrome-app.account-auth-open .auth-password-wrap [data-password-toggle]{display:grid;place-items:center;right:5px;width:34px;height:34px;padding:5px;border:1px solid transparent;background:transparent;color:#315d9b}
+#chrome-app.account-auth-open .auth-password-wrap [data-password-toggle]:hover{border-color:#bac7d7;background:#edf2f8}
+#chrome-app.account-auth-open .auth-password-wrap [data-password-toggle] svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.8}
+
+/* Account uses the same black Nitra Space surface as the rest of the site. */
+#chrome-app.account-auth-open,
+#chrome-app.account-auth-open .page.account.account-signin,
+#chrome-app.account-auth-open main#main,
+#chrome-app.account-auth-open .editorial:has(.auth-window){background:#000!important;background-image:none!important;color:#f5f6f7!important}
+#chrome-app.account-auth-open .auth-window{border:1px solid #ffffff2b!important;border-radius:18px!important;background:linear-gradient(145deg,#101214,#050607 72%)!important;box-shadow:0 24px 70px #000a,inset 0 1px #ffffff12!important}
+#chrome-app.account-auth-open .auth-content{background:transparent!important;color:#f5f6f7!important}
+#chrome-app.account-auth-open .auth-wordmark{filter:none!important}
+#chrome-app.account-auth-open .auth-content-top{border:0!important;border-bottom:1px solid #ffffff20!important;background:#08090a!important;color:#aeb4bb!important;text-shadow:none!important}
+#chrome-app.account-auth-open .auth-secure{color:#aeb4bb!important}
+#chrome-app.account-auth-open .auth-secure i{background:#008cff!important;box-shadow:0 0 9px #008cff88!important}
+#chrome-app.account-auth-open .auth-heading .auth-kicker{color:#168ff0!important}
+#chrome-app.account-auth-open .auth-heading h2{color:#f5f6f7!important;text-shadow:none!important}
+#chrome-app.account-auth-open .auth-heading p,
+#chrome-app.account-auth-open .auth-step-copy{color:#aeb4bb!important}
+#chrome-app.account-auth-open .auth-heading p strong,
+#chrome-app.account-auth-open .auth-step-copy strong{color:#fff!important}
+#chrome-app.account-auth-open .auth-tabs{border:1px solid #ffffff26!important;border-radius:999px!important;background:#08090a!important;box-shadow:none!important}
+#chrome-app.account-auth-open .auth-tabs button,
+#chrome-app.account-auth-open .auth-tabs button:active{border:0!important;border-radius:999px!important;background:transparent!important;color:#aeb4bb!important}
+#chrome-app.account-auth-open .auth-tabs button.active,
+#chrome-app.account-auth-open .auth-tabs button[aria-selected=true]{background:#f5f6f7!important;color:#050607!important;box-shadow:none!important}
+#chrome-app.account-auth-open .auth-fields>label,
+#chrome-app.account-auth-open .auth-field-grid>label{color:#e3e5e7!important}
+#chrome-app.account-auth-open .auth-fields input{border:1px solid #ffffff2b!important;border-radius:10px!important;background:#08090a!important;color:#fff!important;box-shadow:none!important}
+#chrome-app.account-auth-open .auth-fields input::placeholder{color:#7f858b!important}
+#chrome-app.account-auth-open .auth-fields input:focus{outline:2px solid #168ff0!important;outline-offset:1px!important;border-color:#168ff0!important;box-shadow:0 0 0 3px #168ff01c!important}
+#chrome-app.account-auth-open .auth-fields input:disabled{background:#151719!important;color:#858b91!important}
+#chrome-app.account-auth-open .auth-password-wrap [data-password-toggle],
+#chrome-app.account-auth-open .auth-text-button{color:#c4c9ce!important;text-decoration-color:#ffffff40!important}
+#chrome-app.account-auth-open .auth-password-wrap [data-password-toggle]:hover{border-color:#ffffff30!important;background:#ffffff0d!important}
+#chrome-app.account-auth-open .auth-hint,
+#chrome-app.account-auth-open .auth-footnote{color:#858b91!important}
+#chrome-app.account-auth-open .auth-message.error{color:#ff9696!important}
+#chrome-app.account-auth-open .auth-message.success{color:#86e3b6!important}
+#chrome-app.account-auth-open .auth-divider{color:#858b91!important}
+#chrome-app.account-auth-open .auth-divider:before,
+#chrome-app.account-auth-open .auth-divider:after{background:#ffffff25!important}
+#chrome-app.account-auth-open .auth-submit{border:1px solid #f5f6f7!important;border-radius:10px!important;background:linear-gradient(110deg,#fff,#dedfe1 48%,#fff)!important;color:#08090a!important;box-shadow:none!important}
+#chrome-app.account-auth-open .auth-submit span{color:#08090a!important}
+#chrome-app.account-auth-open .auth-google{border:1px solid #ffffff30!important;border-radius:10px!important;background:#0a0b0c!important;color:#f5f6f7!important;box-shadow:none!important}
+#chrome-app.account-auth-open .auth-google b{border:1px solid #ffffff30!important;background:#fff!important;color:#111!important}
+#chrome-app.account-auth-open .auth-progress i{background:#ffffff20!important}
+#chrome-app.account-auth-open .auth-progress i.active{background:#168ff0!important;box-shadow:0 0 10px #168ff055!important}
+#chrome-app.account-auth-open .auth-inline-actions button{color:#d1d4d7!important}

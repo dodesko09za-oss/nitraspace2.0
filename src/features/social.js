@@ -88,8 +88,18 @@ async function matchingImage(file){
   return blob
 }
 async function account(){
-  if(state.needsProfile)return clerkProfileForm()
-  if(!state.user)return authForm(/#signup(?:\/|$)/i.test(location.hash))
+  if(state.needsProfile){document.querySelector('#chrome-app')?.classList.add('account-auth-open');return clerkProfileForm()}
+  if(state.user&&new URLSearchParams(location.search).get('return_to')==='/random'){window.location.replace('/random');return}
+  if(!state.user&&state.clerkUser){
+    authWindow('NITRA SPACE / ÚČET',`<div class="auth-heading"><h2>Už máš otvorenú reláciu.</h2><p>Clerk má aktívnu reláciu pre <strong>${html(state.clerkUser.primaryEmailAddress?.emailAddress||'existujúci účet')}</strong>.</p></div><p class="auth-message error" role="alert">${state.clerkError?html(authError(state.clerkError)):''}</p><button class="auth-submit" type="button" data-switch-account>Použiť iný e-mail</button>`)
+    document.querySelector('[data-switch-account]').onclick=event=>{
+      event.currentTarget.disabled=true
+      void signOut(`/account${location.search}#signup`)
+    }
+    return
+  }
+  if(!state.user){document.querySelector('#chrome-app')?.classList.add('account-auth-open');return authForm(/#signup(?:\/|$)/i.test(location.hash))}
+  document.querySelector('#chrome-app')?.classList.remove('account-auth-open')
   const [profileResult,blocked]=await Promise.all([
     db.from('profiles').select('id,username,display_name,bio,avatar_path,discoverable,people_interests').eq('id',state.user.id).single(),
     db.rpc('list_blocked_accounts')
@@ -112,43 +122,43 @@ content(`<section class="account-heading"><span>NITRA SPACE / NASTAVENIA</span><
 let authFlowMode='signin'
 const authError=error=>{
  const detail=typeof error==='string'?error:error?.errors?.map(item=>item.longMessage||item.message).filter(Boolean).join(' ')||error?.longMessage||error?.message||''
+ if(error?.code==='session_exists'||error?.errors?.some(item=>item.code==='session_exists'))return 'V tomto prehliadači už máš otvorenú reláciu. Obnov stránku a vyber Použiť iný e-mail.'
  if(detail.startsWith('Clerk nastavenie vo Verceli:'))return detail
  if(/(?:sk|pk)_(?:test|live)_|CLERK_SECRET_KEY|publishableKey/i.test(detail))return 'Prihlasovanie sa nepodarilo načítať. Skús obnoviť stránku alebo to chvíľu počkaj.'
  return detail||'Prihlásenie sa nepodarilo.'
 }
 const throwClerkError=result=>{if(result?.error)throw result.error}
 function authWindow(label,body){
+ document.querySelector('#chrome-app')?.classList.add('account-auth-open')
  content(`<section class="auth-window">
-  <aside class="auth-visual" aria-label="Nitra Space">
-   <div class="auth-wordmark"><span>NITRA</span><span>SPACE</span></div>
-   <div class="auth-visual-copy"><span class="auth-visual-kicker">JEDNO MESTO · JEDEN PRIESTOR</span><h1>VITAJ<br>V NITRE.</h1><p>Ľudia, chaty a udalosti<br>na jednom mieste.</p></div>
-   <img class="auth-visual-art" src="/chrome-sculpture.png" alt="" aria-hidden="true">
-   <div class="auth-visual-foot"><span>ONE CITY.</span><span>ONE SPACE.</span><i></i></div>
-  </aside>
-  <div class="auth-content"><div class="auth-content-top"><span>${html(label)}</span><span class="auth-secure"><i></i> ZABEZPEČENÉ PRIHLÁSENIE</span></div>${body}</div>
+  <div class="auth-content"><img class="auth-wordmark" src="/nitra-space-logo-optimized.webp" alt="Nitra Space"><div class="auth-content-top"><span>${html(label)}</span><span class="auth-secure"><i></i> ZABEZPEČENÉ PRIHLÁSENIE</span></div>${body}</div>
  </section>`)
 }
 function wirePasswordToggles(root=document){
  root.querySelectorAll('[data-password-toggle]').forEach(button=>button.onclick=()=>{
   const input=button.parentElement?.querySelector('input[type="password"],input[type="text"]')
   if(!input)return
-  const show=input.type==='password';input.type=show?'text':'password';button.textContent=show?'Skryť':'Zobraziť';button.setAttribute('aria-label',show?'Skryť heslo':'Zobraziť heslo')
+  const show=input.type==='password';input.type=show?'text':'password';button.innerHTML=passwordToggleIcon(show);button.setAttribute('aria-label',show?'Skryť heslo':'Zobraziť heslo')
  })
 }
+const passwordToggleIcon=show=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${show?'M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Zm10-3a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z':'m3 3 18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.8 5.2A11 11 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-2.1 2.8M6.2 6.2C3.6 7.8 2 12 2 12s3.6 7 10 7a11 11 0 0 0 2.2-.2'}"/></svg>`
 function profileValues(form){
  const values=Object.fromEntries(new FormData(form))
- const name=String(values.display_name||'').trim(),username=String(values.username||'').trim().toLowerCase(),birth_date=String(values.birth_date||'')
- if(!name)throw new Error('Vyplň svoje meno.')
- if(!/^(?=.*[a-z_])[a-z0-9_]{4,24}$/.test(username))throw new Error('Používateľské meno musí mať 4 až 24 znakov, aspoň jedno písmeno alebo podčiarkovník a môže obsahovať malé písmená, číslice a podčiarkovníky.')
+ const username=String(values.username||'').trim().toLowerCase(),birth_date=String(values.birth_date||'')
+ if(!/^(?=.*[a-z])[a-z0-9_]{4,24}$/.test(username))throw new Error('Používateľské meno musí mať 4 až 24 znakov, aspoň jedno písmeno a môže obsahovať malé písmená, číslice a podčiarkovníky.')
+ const name=username
  const birth=new Date(`${birth_date}T00:00:00`),cutoff=new Date();cutoff.setFullYear(cutoff.getFullYear()-16)
  if(!birth_date||Number.isNaN(birth.getTime())||birth>cutoff)throw new Error('Komunitný účet je dostupný od 16 rokov.')
  return {display_name:name,username,birth_date}
 }
 async function finishClerkLogin(profile=null){
+ const returnTo=new URLSearchParams(location.search).get('return_to')
  const linked=await syncClerkSessionToSupabase(db,profile)
+ if(!linked.user&&!linked.profileRequired)throw new Error('Reláciu sa nepodarilo otvoriť. Skús sa prihlásiť znova.')
  state.needsProfile=linked.profileRequired;state.clerkUser=linked.clerkUser||state.clerkUser;state.clerkError=null;state.user=linked.user;state.admin=false
  window.dispatchEvent(new Event('nitra-auth-change'))
  if(linked.profileRequired){await account();return}
+ if(returnTo==='/random'){window.location.assign('/random');return}
  history.replaceState(null,'',location.pathname)
  notice('Prihlásenie úspešné.')
  await account()
@@ -159,26 +169,50 @@ function authForm(signup=false){
  authWindow('NITRA SPACE / ÚČET',`<div class="auth-heading"><span class="auth-kicker">SVOJE MIESTO V NITRE</span><h2>${signup?'Vytvor si účet.':'Vitaj späť.'}</h2><p>${signup?'Vytvor si účet a buď súčasťou Nitra Space.':'Prihlás sa a pokračuj tam, kde si skončil.'}</p></div>
   <div class="auth-tabs" role="tablist" aria-label="Typ účtu"><button type="button" role="tab" aria-selected="${!signup}" class="${signup?'':'active'}" data-auth-switch="signin">Prihlásenie</button><button type="button" role="tab" aria-selected="${signup}" class="${signup?'active':''}" data-auth-switch="signup">Nový účet</button></div>
    ${state.clerkError?`<p class="auth-message error" role="alert">${html(authError(state.clerkError))}</p>`:!isConfigured?'<p class="auth-message error" role="alert">Chýba VITE_CLERK_PUBLISHABLE_KEY. Pridaj Clerk Publishable Key do lokálneho .env a reštartuj Vite.</p>':''}
-  <form class="auth-fields" data-clerk-auth>${signup?`<div class="auth-field-grid"><label>Meno<input name="display_name" required maxlength="50" autocomplete="name" placeholder="Tvoje meno"></label><label>Používateľské meno<input name="username" required minlength="4" maxlength="24" pattern="(?=.*[a-z_])[a-z0-9_]{4,24}" autocomplete="username" placeholder="napr. dodo_nitra"></label></div><label>Dátum narodenia <span class="auth-hint">Účet je dostupný od 16 rokov</span><input name="birth_date" type="date" required autocomplete="bday"></label>`:''}<label>E-mail<input name="email" type="email" required autocomplete="email" placeholder="ty@email.sk"></label><label class="auth-password-label"><span>Heslo</span>${signup?'':`<button type="button" class="auth-text-button" data-reset-password>Zabudol si heslo?</button>`}<span class="auth-password-wrap"><input name="password" type="password" required minlength="8" autocomplete="${signup?'new-password':'current-password'}" placeholder="${signup?'Aspoň 8 znakov':'Tvoje heslo'}"><button type="button" data-password-toggle aria-label="Zobraziť heslo">Zobraziť</button></span></label><p class="auth-message error" data-auth-message role="alert" aria-live="polite"></p><button class="auth-submit" type="submit" ${isConfigured?'':'disabled'}>${signup?'Vytvoriť účet':'Prihlásiť sa'} <span aria-hidden="true">↗</span></button></form>
-  <div class="auth-divider"><span>alebo</span></div><button class="auth-google" type="button" data-google-auth ${isConfigured?'':'disabled'}><b aria-hidden="true">G</b> Pokračovať cez Google</button><p class="auth-footnote">Zabezpečené prihlásenie cez Clerk · Nitra Space</p>`)
+  <form class="auth-fields" data-clerk-auth>${signup?`<label>Používateľské meno<input name="username" required minlength="4" maxlength="24" pattern="(?=.*[A-Za-z])[A-Za-z0-9_]{4,24}" autocomplete="username" autocapitalize="none" spellcheck="false" aria-describedby="username-hint"><span class="auth-hint" id="username-hint">4 až 24 znakov, aspoň jedno písmeno bez diakritiky. Povolené sú aj čísla a podčiarkovník.</span></label><label>Dátum narodenia <span class="auth-hint">Účet je dostupný od 16 rokov</span><input name="birth_date" type="date" required autocomplete="bday"></label>`:''}<label>E-mail<input name="email" type="email" required autocomplete="email" placeholder="ty@email.sk"></label><label class="auth-password-label"><span>Heslo</span>${signup?'':`<button type="button" class="auth-text-button" data-reset-password>Zabudol si heslo?</button>`}<span class="auth-password-wrap"><input name="password" type="password" required minlength="8" autocomplete="${signup?'new-password':'current-password'}" placeholder="${signup?'Aspoň 8 znakov':'Tvoje heslo'}"><button type="button" data-password-toggle aria-label="Zobraziť heslo">${passwordToggleIcon(false)}</button></span></label><p class="auth-message error" data-auth-message role="alert" aria-live="polite"></p><button class="auth-submit" type="submit" ${isConfigured?'':'disabled'}>${signup?'Vytvoriť účet':'Prihlásiť sa'} <span aria-hidden="true">↗</span></button></form>
+  <p class="auth-footnote">Zabezpečené prihlásenie cez Clerk · Nitra Space</p>`)
  document.querySelectorAll('[data-auth-switch]').forEach(button=>button.onclick=()=>navigate(button.dataset.authSwitch==='signup'?'/account#signup':'/account'))
  const form=document.querySelector('[data-clerk-auth]'),message=form.querySelector('[data-auth-message]'),submit=form.querySelector('[type=submit]')
+ const pendingEmail=sessionStorage.getItem('nitra-switch-email')
+ if(pendingEmail){sessionStorage.removeItem('nitra-switch-email');form.elements.email.value=pendingEmail}
  wirePasswordToggles(form)
  form.onsubmit=async event=>{
   event.preventDefault();submit.disabled=true;message.textContent=''
   try{
    const values=Object.fromEntries(new FormData(form)),clerk=await getClerk()
+   if(clerk.session){
+    message.textContent='V prehliadači zostala aktívna relácia. Ukonči ju, aby si mohol pokračovať s týmto e-mailom.'
+    const switchAccount=document.createElement('button')
+    switchAccount.type='button'
+    switchAccount.className='auth-text-button'
+    switchAccount.textContent='Odhlásiť starú reláciu a pokračovať'
+    message.after(switchAccount)
+    switchAccount.onclick=async ()=>{
+     switchAccount.disabled=true
+     try{
+      sessionStorage.setItem('nitra-switch-email',form.elements.email.value.trim())
+      await clerk.signOut({redirectUrl:window.location.href})
+     }catch(error){
+      sessionStorage.removeItem('nitra-switch-email')
+      message.textContent=authError(error)
+      switchAccount.disabled=false
+     }
+    }
+    return
+   }
    if(signup){
      const profile=profileValues(form),flow=clerk.client.signUp.__internal_future
-     const [firstName,...lastNameParts]=profile.display_name.split(/\s+/)
-     const lastName=lastNameParts.join(' ')
-     throwClerkError(await flow.password({emailAddress:values.email.trim(),password:values.password,username:profile.username,firstName,...(lastName?{lastName}:{}),unsafeMetadata:{nitra_profile:profile}}))
+     // Nitra Space owns its username in profile metadata. Passing `username` as
+     // a Clerk field makes signup fail when the Clerk instance has that field
+     // disabled; `unsafeMetadata` is the supported custom-field path instead.
+     throwClerkError(await flow.password({emailAddress:values.email.trim(),password:values.password,unsafeMetadata:{nitra_profile:profile}}))
+    if(flow.missingFields?.includes('username')) throwClerkError(await flow.update({username:profile.username}))
     throwClerkError(await flow.verifications.sendEmailCode())
     verificationForm('Potvrď svoj e-mail.',values.email,async code=>{
      throwClerkError(await flow.verifications.verifyEmailCode({code}))
       if(flow.status!=='complete'){const missing=(flow.missingFields||[]).map(field=>({username:'používateľské meno',email_address:'e-mail',password:'heslo',first_name:'meno',last_name:'priezvisko'}[field]||field)).join(', ');throw new Error(missing?`Clerk ešte vyžaduje: ${missing}.`:'Clerk ešte potrebuje ďalší krok prihlásenia.')}
      throwClerkError(await flow.finalize())
-     await finishClerkLogin()
+     await finishClerkLogin(profile)
     })
    }else{
     const flow=clerk.client.signIn.__internal_future
@@ -193,26 +227,19 @@ function authForm(signup=false){
    }
   }catch(error){message.textContent=authError(error);submit.disabled=false}
  }
- document.querySelector('[data-google-auth]').onclick=async event=>{
-  const button=event.currentTarget;button.disabled=true;message.textContent=''
-  try{
-   const clerk=await getClerk(),redirectUrl=`${location.origin}/account`
-   if(signup){const profile=profileValues(form);throwClerkError(await clerk.client.signUp.__internal_future.sso({strategy:'oauth_google',redirectUrl,redirectCallbackUrl:redirectUrl,unsafeMetadata:{nitra_profile:profile}}))}
-   else throwClerkError(await clerk.client.signIn.__internal_future.sso({strategy:'oauth_google',redirectUrl,redirectCallbackUrl:redirectUrl}))
-  }catch(error){message.textContent=authError(error);button.disabled=false}
- }
  document.querySelector('[data-reset-password]')?.addEventListener('click',()=>forgotPasswordForm(form.elements.email.value.trim()))
 }
 function verificationForm(title,email,onVerify){
- authWindow('NITRA SPACE / OVERENIE',`<div class="auth-heading"><span class="auth-kicker">KROK 02 · OVERENIE</span><h2>${html(title)}</h2><p>Šesťmiestny kód sme poslali na <strong>${html(email)}</strong>. Skontroluj aj priečinok so spamom.</p></div><form class="auth-fields" data-code-form><label>Overovací kód<input name="code" inputmode="numeric" autocomplete="one-time-code" required minlength="4" maxlength="12" placeholder="000000" autofocus></label><p class="auth-message error" data-auth-message role="alert" aria-live="polite"></p><button class="auth-submit" type="submit">Potvrdiť kód <span aria-hidden="true">↗</span></button></form><div class="auth-inline-actions"><button class="auth-text-button" type="button" data-resend-code>Poslať nový kód</button><button class="auth-text-button" type="button" data-auth-back>Späť na prihlásenie</button></div>`)
+ authWindow('NITRA SPACE / OVERENIE',`<div class="auth-heading"><span class="auth-kicker">KROK 02 · OVERENIE</span><h2>${html(title)}</h2><p>Šesťmiestny kód sme poslali na <strong>${html(email)}</strong>. Skontroluj aj priečinok so spamom.</p></div><form class="auth-fields" data-code-form><label>Overovací kód<input name="code" inputmode="numeric" autocomplete="one-time-code" required pattern="[0-9]{6}" maxlength="6" placeholder="000000" autofocus></label><p class="auth-message error" data-auth-message role="alert" aria-live="polite"></p><button class="auth-submit" type="submit">Potvrdiť kód <span aria-hidden="true">↗</span></button></form><div class="auth-inline-actions"><button class="auth-text-button" type="button" data-resend-code>Poslať nový kód</button><button class="auth-text-button" type="button" data-auth-back>Späť na prihlásenie</button></div>`)
  const form=document.querySelector('[data-code-form]'),message=form.querySelector('[data-auth-message]'),button=form.querySelector('[type=submit]')
- form.onsubmit=async event=>{event.preventDefault();button.disabled=true;message.textContent='';try{await onVerify(form.elements.code.value.trim())}catch(error){message.textContent=authError(error);button.disabled=false}}
- document.querySelector('[data-resend-code]').onclick=async event=>{const resend=event.currentTarget;resend.disabled=true;message.textContent='';try{const clerk=await getClerk();const flow=authFlowMode==='signup'?clerk.client.signUp.__internal_future:clerk.client.signIn.__internal_future;throwClerkError(authFlowMode==='signup'?await flow.sendEmailCode():await flow.mfa.sendEmailCode());message.className='auth-message success';message.textContent='Nový kód sme poslali na e-mail.'}catch(error){message.className='auth-message error';message.textContent=authError(error)}finally{resend.disabled=false}}
- document.querySelector('[data-auth-back]').onclick=event=>{event.preventDefault();authForm(authFlowMode==='signup')}
+ form.onsubmit=async event=>{event.preventDefault();if(button.disabled)return;button.disabled=true;message.textContent='';try{await onVerify(form.elements.code.value.trim())}catch(error){message.textContent=authError(error);button.disabled=false}}
+ form.elements.code.addEventListener('input',()=>{if(/^[0-9]{6}$/.test(form.elements.code.value)&&!button.disabled)form.requestSubmit()})
+ document.querySelector('[data-resend-code]').onclick=async event=>{const resend=event.currentTarget;resend.disabled=true;message.textContent='';try{const clerk=await getClerk();const flow=authFlowMode==='signup'?clerk.client.signUp.__internal_future:clerk.client.signIn.__internal_future;throwClerkError(authFlowMode==='signup'?await flow.verifications.sendEmailCode():await flow.mfa.sendEmailCode());message.className='auth-message success';message.textContent='Nový kód sme poslali na e-mail.'}catch(error){message.className='auth-message error';message.textContent=authError(error)}finally{resend.disabled=false}}
+ document.querySelector('[data-auth-back]').onclick=event=>{event.preventDefault();navigate('/account')}
 }
 function clerkProfileForm(){
  const email=state.clerkUser?.primaryEmailAddress?.emailAddress||state.clerkUser?.emailAddresses?.find(item=>item.id===state.clerkUser?.primaryEmailAddressId)?.emailAddress||''
-  authWindow('NITRA SPACE / DOKONČENIE PROFILU',`<div class="auth-heading"><span class="auth-kicker">POSLEDNÝ KROK</span><h2>Ešte pár údajov.</h2><p>Tvoje staré správy a dáta zostanú zachované.</p></div><form class="auth-fields" data-clerk-profile><label>Meno<input name="display_name" required maxlength="50" autocomplete="name" placeholder="Tvoje meno"></label><label>Používateľské meno<input name="username" required minlength="4" maxlength="24" pattern="(?=.*[a-z_])[a-z0-9_]{4,24}" autocomplete="username" placeholder="napr. dodo_nitra"></label><label>Dátum narodenia <span class="auth-hint">Účet je dostupný od 16 rokov</span><input name="birth_date" type="date" required autocomplete="bday"></label><label>E-mail<input type="email" value="${html(email)}" disabled></label><p class="auth-message error" data-auth-message role="alert"></p><button class="auth-submit" type="submit">Pokračovať <span aria-hidden="true">↗</span></button></form>`)
+  authWindow('NITRA SPACE / DOKONČENIE PROFILU',`<div class="auth-heading"><span class="auth-kicker">POSLEDNÝ KROK</span><h2>Ešte pár údajov.</h2><p>Tvoje staré správy a dáta zostanú zachované.</p></div><form class="auth-fields" data-clerk-profile><label>Používateľské meno<input name="username" required minlength="4" maxlength="24" pattern="(?=.*[A-Za-z])[A-Za-z0-9_]{4,24}" autocomplete="username" autocapitalize="none" spellcheck="false" aria-describedby="username-hint"><span class="auth-hint" id="username-hint">4 až 24 znakov, aspoň jedno písmeno bez diakritiky. Povolené sú aj čísla a podčiarkovník.</span></label><label>Dátum narodenia <span class="auth-hint">Účet je dostupný od 16 rokov</span><input name="birth_date" type="date" required autocomplete="bday"></label><label>E-mail<input type="email" value="${html(email)}" disabled></label><p class="auth-message error" data-auth-message role="alert"></p><button class="auth-submit" type="submit">Pokračovať <span aria-hidden="true">↗</span></button></form>`)
  const form=document.querySelector('[data-clerk-profile]'),message=form.querySelector('[data-auth-message]'),button=form.querySelector('[type=submit]')
  form.onsubmit=async event=>{event.preventDefault();button.disabled=true;message.textContent='';try{await finishClerkLogin(profileValues(form))}catch(error){message.textContent=authError(error);button.disabled=false}}
 }
@@ -220,7 +247,7 @@ function forgotPasswordForm(initialEmail=''){
  let flow=null,step='email',email=initialEmail
  const paint=()=>{
   const progress=['email','code','password'].indexOf(step)+1
-  const fields=step==='email'?`<p class="auth-step-copy">Zadaj e-mail účtu. Pošleme ti bezpečný kód na obnovu.</p><label>E-mail<input name="email" type="email" required autocomplete="email" value="${html(email)}" placeholder="ty@email.sk" autofocus></label>`:step==='code'?`<p class="auth-step-copy">Kód sme poslali na <strong>${html(email)}</strong>. Ak ho nevidíš, skontroluj spam alebo si pošli nový.</p><label>Overovací kód<input name="code" inputmode="numeric" autocomplete="one-time-code" required minlength="4" maxlength="12" placeholder="000000" autofocus></label>`:`<p class="auth-step-copy">Vyber si nové heslo. Použi aspoň 8 znakov.</p><label>Nové heslo<span class="auth-password-wrap"><input name="password" type="password" minlength="8" autocomplete="new-password" required placeholder="Aspoň 8 znakov"><button type="button" data-password-toggle aria-label="Zobraziť heslo">Zobraziť</button></span></label><label>Zopakuj nové heslo<span class="auth-password-wrap"><input name="confirm" type="password" minlength="8" autocomplete="new-password" required placeholder="Zopakuj heslo"><button type="button" data-password-toggle aria-label="Zobraziť heslo">Zobraziť</button></span></label>`
+  const fields=step==='email'?`<p class="auth-step-copy">Zadaj e-mail účtu. Pošleme ti bezpečný kód na obnovu.</p><label>E-mail<input name="email" type="email" required autocomplete="email" value="${html(email)}" placeholder="ty@email.sk" autofocus></label>`:step==='code'?`<p class="auth-step-copy">Kód sme poslali na <strong>${html(email)}</strong>. Ak ho nevidíš, skontroluj spam alebo si pošli nový.</p><label>Overovací kód<input name="code" inputmode="numeric" autocomplete="one-time-code" required minlength="4" maxlength="12" placeholder="000000" autofocus></label>`:`<p class="auth-step-copy">Vyber si nové heslo. Použi aspoň 8 znakov.</p><label>Nové heslo<span class="auth-password-wrap"><input name="password" type="password" minlength="8" autocomplete="new-password" required placeholder="Aspoň 8 znakov"><button type="button" data-password-toggle aria-label="Zobraziť heslo">${passwordToggleIcon(false)}</button></span></label><label>Zopakuj nové heslo<span class="auth-password-wrap"><input name="confirm" type="password" minlength="8" autocomplete="new-password" required placeholder="Zopakuj heslo"><button type="button" data-password-toggle aria-label="Zobraziť heslo">${passwordToggleIcon(false)}</button></span></label>`
   authWindow('NITRA SPACE / OBNOVA HESLA',`<div class="auth-heading"><span class="auth-kicker">OBNOVA ÚČTU · KROK ${String(progress).padStart(2,'0')} / 03</span><h2>${step==='email'?'Obnov si heslo.':step==='code'?'Skontroluj e-mail.':'Nastav nové heslo.'}</h2><p>Bezpečne obnov prístup k svojmu účtu Nitra Space.</p></div><div class="auth-progress" aria-label="Krok ${progress} z 3"><i class="${progress>=1?'active':''}"></i><i class="${progress>=2?'active':''}"></i><i class="${progress>=3?'active':''}"></i></div><form class="auth-fields" data-forgot-form>${fields}<p class="auth-message error" data-auth-message role="alert" aria-live="polite"></p><button class="auth-submit" type="submit">${step==='email'?'Poslať obnovovací kód':step==='code'?'Overiť kód':'Uložiť nové heslo'} <span aria-hidden="true">↗</span></button></form><div class="auth-inline-actions">${step==='code'?'<button class="auth-text-button" type="button" data-reset-resend>Poslať nový kód</button><button class="auth-text-button" type="button" data-reset-change-email>Zmeniť e-mail</button>':''}<button class="auth-text-button" type="button" data-auth-back>Späť na prihlásenie</button></div>`)
   const form=document.querySelector('[data-forgot-form]'),message=form.querySelector('[data-auth-message]'),button=form.querySelector('[type=submit]')
   wirePasswordToggles(form)

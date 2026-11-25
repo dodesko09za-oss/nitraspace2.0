@@ -1,0 +1,748 @@
+/* Nitra Space: bright Y2K / MySpace-era desktop UI. Visual styling only. */
+:root {
+  color-scheme: light;
+  --ns-white: #f8fbff;
+  --ns-silver: #d8dee7;
+  --ns-mid: #aab4c2;
+  --ns-ink: #171d27;
+  --ns-blue: #315d9b;
+  --ns-deep-blue: #1e3760;
+  --page: #edf1f6;
+  --surface: #f8faff;
+  --soft: #e4e9f0;
+  --text: #171d27;
+  --muted: #526071;
+  --faint: #718093;
+  --line: #aeb8c6;
+  --button: #d8dee7;
+  --button-text: #172033;
+  --hover: #fff;
+  --bg: #edf1f6;
+  --card: #f8faff;
+  --accent: #315d9b;
+  --blue: #315d9b;
+  --bubble-mine: #dbe8fb;
+  --bubble-mine-text: #14223a;
+  --bubble-theirs: #fff;
+  font-family: Tahoma, Arial, sans-serif;
+  background: #edf1f6;
+  color: #171d27;
+}
+html { color-scheme: light; background: #edf1f6 !important; }
+body {
+  color: #171d27;
+  background: #edf1f6 !important;
+  font-family: Tahoma, Arial, sans-serif !important;
+}
+button, input, textarea, select { font-family: Tahoma, Arial, sans-serif; }
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: 2px solid #5377af !important;
+  outline-offset: 2px;
+}
+
+/* Glossy desktop wallpaper: soft pearlescent light, without screen effects. */
+#chrome-app, #app, #video-chat-app, #socialApp, .linktree {
+  background-color: #e9eef5 !important;
+  background-image:
+    radial-gradient(ellipse at 12% 4%, #fff 0, #ffffff00 33%),
+    radial-gradient(ellipse at 89% 15%, #d8e9ff 0, #d8e9ff00 30%),
+    linear-gradient(145deg, #f8faff 0%, #e3e8ef 45%, #f2f5fa 100%) !important;
+}
+
+/* Classic raised and recessed controls with crisp Win98 geometry. */
+#chrome-app button, #chrome-app a.circle,
+#app button, #video-chat-app button, #socialApp button {
+  -webkit-tap-highlight-color: #315d9b22;
+}
+#chrome-app .circle,
+#chrome-app .primary, #chrome-app .outline, #chrome-app .chips button,
+#chrome-app .school-room-card button, #chrome-app .event-room-form button,
+#chrome-app .admin-toggle, #chrome-app .admin-login-link,
+#app .next-btn, #app .leave-btn, #app .send-btn, #app .start-btn, #app .icon-btn,
+#video-chat-app .vc-btn, #video-chat-app .vc-compose button {
+  border: 1px solid #7c8797 !important;
+  border-radius: 3px !important;
+  background: linear-gradient(180deg, #fff 0%, #edf1f6 42%, #c4ccd7 100%) !important;
+  color: #1b2637 !important;
+  box-shadow: inset 1px 1px #fff, inset -1px -1px #9aa4b2, 1px 1px #788391 !important;
+  text-shadow: 0 1px #fff9;
+}
+#chrome-app button:active:not(:disabled), #app button:active:not(:disabled), #video-chat-app button:active:not(:disabled) {
+  border-style: inset !important;
+  box-shadow: inset 1px 1px #9099a6, inset -1px -1px #fff !important;
+}
+
+/* Metallic application header and glossy Y2K navigation. */
+#chrome-app > header {
+  height: 58px;
+  min-height: 58px;
+  padding: 6px 12px;
+  gap: 12px;
+  border: 1px solid #8d98a7;
+  border-top-color: #fff;
+  border-left-color: #fff;
+  background: linear-gradient(180deg, #fff 0%, #eaf1fb 20%, #b7c8df 48%, #e8edf4 52%, #c2cad4 100%);
+  box-shadow: inset 1px 1px #fff, inset -1px -1px #929dab, 0 4px 14px #61728b44;
+}
+#chrome-app .logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  height: 58px;
+  min-width: max-content;
+  color: #172239;
+  font: 800 19px/.78 Tahoma, Arial, sans-serif;
+  letter-spacing: -1px;
+  text-shadow: 0 1px #fff, 0 2px #8e9baa;
+}
+#chrome-app .logo img {
+  display: block;
+  width: 88px;
+  height: 58px;
+  object-fit: contain;
+  /* Darken the pale chrome so the mark reads clearly against the silver header. */
+  filter: brightness(.68) saturate(1.3) contrast(1.16) drop-shadow(0 1px 0 #ffffffb8);
+}
+#chrome-app .desktop-nav {
+  align-self: stretch;
+  align-items: center;
+  gap: 3px;
+  padding: 3px;
+  border: 1px inset #a3adbb;
+  background: #d8dee8;
+  box-shadow: inset 1px 1px #8e99a8, inset -1px -1px #fff;
+}
+#chrome-app .desktop-nav a {
+  padding: 7px 13px;
+  border: 1px solid transparent;
+  color: #34445d;
+  font: 12px Tahoma, Arial, sans-serif;
+}
+#chrome-app .desktop-nav a:hover,
+#chrome-app .desktop-nav a[aria-current="page"] {
+  border-color: #fff #8794a7 #8794a7 #fff;
+  background: linear-gradient(#fff, #dce5f1);
+  color: #172b4c;
+  box-shadow: inset 1px 1px #fff, 1px 1px #8893a2;
+}
+#chrome-app .header-actions { gap: 5px; }
+#chrome-app .circle {
+  width: 34px;
+  height: 32px;
+  border: 1px solid #8792a1 !important;
+  border-radius: 4px !important;
+  background: linear-gradient(#fff, #e3eaf3 48%, #b5c1d0) !important;
+  color: #203b66;
+  box-shadow: inset 1px 1px #fff, inset -1px -1px #9aa5b3, 1px 1px #fff !important;
+}
+#chrome-app .circle svg { width: 17px; height: 17px; }
+#chrome-app .bottom-nav {
+  height: calc(70px + env(safe-area-inset-bottom));
+  padding: 5px 6px calc(5px + env(safe-area-inset-bottom));
+  gap: 4px;
+  border: 1px solid #98a4b3;
+  border-bottom: 0;
+  background: linear-gradient(#fff, #d8dfe9 4px, #aeb9c8 5px, #e8edf4 100%);
+  box-shadow: inset 1px 1px #fff, inset -1px 0 #8994a3, 0 -4px 16px #72809855;
+}
+#chrome-app .bottom-nav a {
+  gap: 3px;
+  border: 1px solid #a5afbd;
+  background: linear-gradient(#f9fbff, #d6dde7);
+  color: #526071;
+  font: 10px Tahoma, Arial, sans-serif;
+  box-shadow: inset 1px 1px #fff, inset -1px -1px #b0b8c3;
+}
+#chrome-app .bottom-nav a[aria-current="page"] {
+  border-color: #fff #8390a1 #8390a1 #fff;
+  background: linear-gradient(#fff, #c7d6eb);
+  color: #1e3760;
+  box-shadow: inset 1px 1px #fff, inset -1px -1px #8b97a7, 0 0 0 1px #fff;
+}
+#chrome-app .bottom-nav a svg { width: 18px; height: 18px; }
+
+/* MySpace-inspired profile cards and app windows across the site. */
+#chrome-app .page h1, #chrome-app .page h2, #chrome-app .page h3 {
+  color: #192b49;
+  text-shadow: 0 1px #fff, 0 2px #aab5c3;
+}
+#chrome-app .home-title { width: 100%; margin: clamp(24px, 5vw, 58px) 0 12px; font-size: 0; line-height: 0; letter-spacing: 0; }
+#chrome-app .home-title img { display: block; width: min(470px, 82vw); height: auto; filter: drop-shadow(0 10px 18px #7187a555); }
+#chrome-app .eyebrow, #chrome-app .section-heading { color: #315d9b !important; }
+#chrome-app .card, #chrome-app .school-room-card, #chrome-app .event-room-panel,
+#chrome-app .event-room-chat, #chrome-app .global-chat, #chrome-app .settings,
+#chrome-app .account-content, #chrome-app .admin-form, #chrome-app .analytics-panel,
+#chrome-app .empty, #chrome-app dialog {
+  border: 2px outset #b4becb !important;
+  border-radius: 3px !important;
+  background: linear-gradient(145deg, #fff 0%, #f1f4f8 62%, #e0e5ed 100%) !important;
+  color: #202a39;
+  box-shadow: inset 1px 1px #fff, inset -1px -1px #a6b0bd, 2px 4px 12px #52627b2b !important;
+}
+#chrome-app .muted, #chrome-app .event-content p, #chrome-app .settings,
+#chrome-app .account-content { color: #526071; }
+#chrome-app .page.account.account-signin {
+  min-height: calc(100svh - 58px - 68px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-block: clamp(20px, 5vh, 52px);
+}
+#chrome-app .account-signin .account-content {
+  width: min(100%, 560px);
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+#chrome-app .auth-window {
+  max-width: none;
+  margin: 0;
+  overflow: hidden;
+  border: 2px outset #c4ccd7;
+  border-radius: 4px;
+  background: linear-gradient(145deg, #fff 0%, #f0f3f8 65%, #dfe5ee 100%);
+  color: #1d2d48;
+  box-shadow: inset 1px 1px #fff, inset -1px -1px #9aa7b9, 0 16px 34px #293b582e;
+}
+#chrome-app .auth-window-bar {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 5px 8px 5px 12px;
+  background: linear-gradient(90deg, #416a9f, #274878);
+  color: #fff;
+  font: 700 11px/1 Tahoma, Arial, sans-serif;
+  letter-spacing: .035em;
+  text-shadow: 0 1px #18355d;
+}
+#chrome-app .auth-window-controls { display: flex; gap: 3px; }
+#chrome-app .auth-window-controls i {
+  width: 20px;
+  height: 19px;
+  display: grid;
+  place-items: center;
+  border: 1px outset #fff;
+  background: linear-gradient(#f9fbff, #c7d3e4);
+  color: #263b5d;
+  font: 700 12px/1 Tahoma, Arial, sans-serif;
+  font-style: normal;
+  text-shadow: none;
+}
+#chrome-app .auth-window-content { padding: clamp(19px, 4vw, 30px) clamp(20px, 5vw, 38px) 24px; }
+#chrome-app .auth-brand { display: flex; align-items: center; gap: 13px; margin-bottom: 15px; }
+#chrome-app .auth-brand img {
+  display: block;
+  width: 94px;
+  height: 62px;
+  object-fit: contain;
+  filter: brightness(.62) saturate(1.32) contrast(1.18);
+}
+#chrome-app .auth-brand span, #chrome-app .auth-heading > span {
+  color: #416594;
+  font: 700 10px/1.3 Tahoma, Arial, sans-serif;
+  letter-spacing: .14em;
+}
+#chrome-app .auth-heading { margin-bottom: 19px; }
+#chrome-app .auth-heading h2 { margin: 5px 0 2px; font: 400 clamp(30px, 6vw, 40px)/1 Anton, Impact, sans-serif; text-transform: uppercase; }
+#chrome-app .auth-heading p { color: #566780; font: 13px/1.5 Tahoma, Arial, sans-serif; }
+#chrome-app .auth-window label {
+  margin: 12px 0 0;
+  color: #344762;
+  font: 700 11px/1.35 Tahoma, Arial, sans-serif;
+}
+#chrome-app .auth-window input { min-height: 44px; margin-top: 6px; padding: 8px 11px; font: 14px Tahoma, Arial, sans-serif; }
+#chrome-app .auth-window .form-message { margin: 11px 0 0; color: #a52c35; font: 12px/1.45 Tahoma, Arial, sans-serif; }
+#chrome-app .auth-window .primary {
+  min-height: 47px;
+  margin-top: 16px;
+  border: 2px outset #fff;
+  border-radius: 3px;
+  background: linear-gradient(#fff, #e2e9f3 54%, #c5d1e0);
+  color: #1d3558;
+  box-shadow: inset 1px 1px #fff, inset -1px -1px #94a1b3;
+  font: 700 13px Tahoma, Arial, sans-serif;
+  text-transform: none;
+}
+#chrome-app .auth-window .primary:active { border-style: inset; }
+#chrome-app .auth-window .small-action {
+  display: block;
+  margin: 13px auto 0;
+  padding: 7px 10px;
+  border: 1px outset #fff;
+  border-radius: 2px;
+  background: linear-gradient(#fff, #e4eaf2 56%, #cbd5e3);
+  color: #294c79;
+  font: 700 11px Tahoma, Arial, sans-serif;
+  text-decoration: none;
+}
+/* Keep the sign-in screen clean and bright; the chrome sculptures belong to the wider site, not this form. */
+#chrome-app:has(.page.account-signin) {
+  background: #f8faff !important;
+  background-image: none !important;
+}
+#chrome-app:has(.page.account-signin)::before,
+#chrome-app:has(.page.account-signin)::after,
+#chrome-app .account-signin .chrome,
+#chrome-app .account-signin .ornament {
+  display: none !important;
+}
+#chrome-app.account-auth-open {
+  background: #f8faff !important;
+  background-image: none !important;
+}
+#chrome-app.account-auth-open::before,
+#chrome-app.account-auth-open::after {
+  display: none !important;
+}
+#chrome-app.account-auth-open .chrome,
+#chrome-app.account-auth-open .ornament {
+  display: none !important;
+}
+#chrome-app .page.account.account-signin {
+  background: #f8faff !important;
+  background-image: none !important;
+}
+#chrome-app .account-signin .auth-window {
+  background: #fff !important;
+  border: 1px solid #dce2ea !important;
+  border-radius: 14px !important;
+  box-shadow: 0 14px 38px #243b5b14 !important;
+}
+#chrome-app .account-signin .auth-window-bar {
+  min-height: 48px;
+  padding: 10px 18px;
+  border-bottom: 1px solid #e7ebf0;
+  background: #fff !important;
+  color: #26364d !important;
+  text-shadow: none !important;
+}
+#chrome-app .account-signin .auth-window-controls i {
+  border: 1px solid #d8dee7;
+  border-radius: 5px;
+  background: #f7f9fc;
+  color: #526071;
+  box-shadow: none;
+}
+#chrome-app .account-signin .auth-window-content {
+  background: #fff !important;
+}
+#chrome-app .account-signin .auth-brand img {
+  filter: brightness(.58) saturate(1.2) contrast(1.2);
+}
+#chrome-app input, #chrome-app textarea, #chrome-app select {
+  border: 2px inset #acb5c0 !important;
+  border-radius: 2px !important;
+  background: #fff !important;
+  color: #182235 !important;
+  box-shadow: inset 1px 1px #929eae !important;
+}
+#chrome-app .event-card { background: #dce2ea !important; }
+#chrome-app .tags span { border-radius: 2px; background: #e8eef7; color: #243b60; }
+#chrome-app .person-card { border: 2px outset #b9c3d0; }
+#chrome-app .chrome { filter: grayscale(.25) brightness(1.45) saturate(.7); opacity: .55; }
+
+/* Chat window: title bars, connection controls, inset message log and raised buttons. */
+#chrome-app main#main.is-anonymous-chat .anonymous-chat-shell {
+  position: relative;
+  min-width: 0;
+  border: 2px outset #adb8c7 !important;
+  border-radius: 2px !important;
+  padding-top: 25px;
+  background: #dce2eb !important;
+  box-shadow: 2px 4px 14px #56657a55 !important;
+}
+#chrome-app main#main.is-anonymous-chat .anonymous-chat-shell::before {
+  content: "NITRA SPACE  —  ANONYMOUS CHAT";
+  position: absolute;
+  z-index: 4;
+  inset: 2px 2px auto;
+  height: 21px;
+  display: flex;
+  align-items: center;
+  padding: 0 7px;
+  color: #fff;
+  background: linear-gradient(90deg, #6b8fc5, #395d91 65%, #27436e);
+  border-bottom: 1px solid #b8cce8;
+  font: bold 10px Tahoma, Arial, sans-serif;
+  letter-spacing: .035em;
+  text-shadow: 1px 1px #223957;
+  pointer-events: none;
+}
+#chrome-app main#main.is-anonymous-chat .anonymous-chat-shell::after {
+  content: "_  □  ×";
+  position: absolute;
+  z-index: 5;
+  top: 3px;
+  right: 4px;
+  height: 18px;
+  min-width: 55px;
+  padding: 1px 3px;
+  border: 1px outset #fff;
+  background: linear-gradient(#fff, #c4ccd6);
+  color: #16243a;
+  text-align: center;
+  font: bold 11px/14px Arial, sans-serif;
+  pointer-events: none;
+}
+#chrome-app .anonymous-chat-page .chat-topline {
+  border: 1px solid #a0adbd !important;
+  border-bottom-color: #8793a3 !important;
+  border-radius: 2px !important;
+  padding: 12px 14px !important;
+  background: linear-gradient(135deg, #fff, #e5ebf3 54%, #d4deeb) !important;
+  box-shadow: inset 1px 1px #fff, inset -1px -1px #b8c1cc;
+}
+#chrome-app .anonymous-chat-page .chat-topline h1 {
+  color: #1c2b43 !important;
+  font: bold clamp(19px, 3vw, 29px)/1.05 Tahoma, Arial, sans-serif !important;
+  letter-spacing: -.04em !important;
+  text-shadow: 0 1px #fff, 0 2px #aab5c3 !important;
+}
+#chrome-app .anonymous-chat-page .chat-title-lockup .section-heading {
+  color: #315d9b !important;
+  font: bold 9px Tahoma, Arial, sans-serif !important;
+  letter-spacing: .12em !important;
+}
+#chrome-app .anonymous-chat-page .chat-topline p { color: #536072 !important; }
+#chrome-app .anonymous-chat-page .chat-mode-switch {
+  border: 2px inset #aab3c0 !important;
+  border-radius: 3px !important;
+  padding: 2px !important;
+  background: #e4e9f0 !important;
+}
+#chrome-app .anonymous-chat-page .chat-mode-switch a {
+  border: 1px solid transparent;
+  border-radius: 2px !important;
+  color: #4c5b6f !important;
+  font: 10px Tahoma, Arial, sans-serif !important;
+}
+#chrome-app .anonymous-chat-page .chat-mode-switch a.is-active {
+  border: 1px outset #fff;
+  background: linear-gradient(#fff, #c9d8eb) !important;
+  color: #1b3762 !important;
+  box-shadow: inset 1px 1px #fff, inset -1px -1px #96a4b5;
+}
+
+html.aura-embed {
+  color-scheme: light;
+  --page: #e6ebf2;
+  --surface: #fff;
+  --soft: #e1e6ed;
+  --text: #172033;
+  --muted: #536071;
+  --faint: #758195;
+  --line: #aeb8c6;
+  --blue: #315d9b;
+  --bubble-mine: #dce9fb;
+  --bubble-mine-text: #172b49;
+  --bubble-theirs: #fff;
+}
+html.aura-embed body, html.aura-embed #app { color: #172033 !important; background: #e8edf4 !important; }
+html.aura-embed .chat-page {
+  background: linear-gradient(145deg, #f8faff, #dbe3ee 70%, #edf2f8) !important;
+}
+html.aura-embed .chat-window {
+  position: relative;
+  width: min(100%, 1180px) !important;
+  margin: auto;
+  padding: 8px !important;
+  gap: 7px !important;
+  border: 2px outset #aab5c4;
+  background: linear-gradient(#f7f9fc, #dce3ec);
+  box-shadow: inset 1px 1px #fff, inset -1px -1px #a1adbc, 2px 3px 12px #65748a33;
+}
+html.aura-embed .status-row {
+  min-height: 29px !important;
+  padding: 4px 8px !important;
+  border: 1px inset #a5afbd !important;
+  border-radius: 1px !important;
+  background: linear-gradient(#1c2d4b, #101c31) !important;
+  color: #e8f1ff !important;
+  box-shadow: inset 1px 1px #07101e, inset -1px -1px #7183a1 !important;
+  font: 11px Tahoma, Arial, sans-serif !important;
+  letter-spacing: 0 !important;
+}
+html.aura-embed .status-row.connected, html.aura-embed .status-row.searching { color: #e8f1ff !important; }
+html.aura-embed .status-row .online-badge { color: #c5d7f3; }
+html.aura-embed .status-row .online-dot, html.aura-embed .status-dot { background: #a9d4ff !important; box-shadow: none !important; }
+html.aura-embed .gender-preference-preview {
+  padding: 8px !important;
+  border: 2px outset #adb8c6 !important;
+  border-radius: 2px !important;
+  background: linear-gradient(145deg, #fff, #e5ebf3) !important;
+  box-shadow: inset 1px 1px #fff, inset -1px -1px #a1adbb !important;
+  backdrop-filter: none !important;
+}
+html.aura-embed .gender-eyebrow, html.aura-embed .gender-preference-note { color: #58677b !important; }
+html.aura-embed .gender-preference-copy strong { color: #1b2b44 !important; }
+html.aura-embed .gender-preference-options button {
+  min-height: 32px;
+  border: 1px outset #fff !important;
+  border-radius: 3px !important;
+  background: linear-gradient(#fff, #d1d9e4) !important;
+  color: #293a53 !important;
+  box-shadow: inset 1px 1px #fff, inset -1px -1px #9ba6b5 !important;
+  backdrop-filter: none !important;
+}
+html.aura-embed .gender-preference-options button.selected { border-style: inset !important; background: #d4e5fb !important; color: #1e3c69 !important; }
+html.aura-embed .transcript {
+  position: relative;
+  gap: 0;
+  padding: 30px 12px 12px !important;
+  border: 2px inset #adb8c6 !important;
+  border-radius: 1px !important;
+  background: #f9fbfe !important;
+  box-shadow: inset 1px 1px #9aa6b5, inset -1px -1px #fff !important;
+}
+html.aura-embed .transcript::before {
+  content: "CHAT LOG  /  LIVE SESSION";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  padding: 0 7px;
+  border-bottom: 1px solid #aab4c1;
+  background: linear-gradient(#fff, #d7dfe9);
+  color: #263b5d;
+  font: bold 10px Tahoma, Arial, sans-serif;
+  letter-spacing: .05em;
+}
+html.aura-embed .system-message { color: #64748a !important; }
+html.aura-embed .system-message strong { color: #213653 !important; }
+html.aura-embed .system-message span { color: #64748a !important; }
+html.aura-embed .transcript > .system-message { min-height: 0; }
+html.aura-embed .chat-line { font: 13px/1.4 Tahoma, Arial, sans-serif !important; }
+html.aura-embed .message-author { font: bold 10px Tahoma, Arial, sans-serif !important; color: #486891; }
+html.aura-embed .message-bubble, html.aura-embed .typing-indicator {
+  padding: 7px 9px;
+  border: 1px solid #b3bfce !important;
+  border-radius: 3px !important;
+  background: linear-gradient(#fff, #edf1f6) !important;
+  color: #202b3b !important;
+  box-shadow: inset 1px 1px #fff, 1px 1px #d3dae3 !important;
+  font: 13px/1.4 Tahoma, Arial, sans-serif !important;
+}
+html.aura-embed .chat-line.mine .message-bubble {
+  border-color: #fff #9eacc0 #9eacc0 #fff !important;
+  background: linear-gradient(#f7fbff, #cfe0f6) !important;
+  color: #1b3458 !important;
+  box-shadow: inset 1px 1px #fff, inset -1px -1px #a2b1c3 !important;
+}
+html.aura-embed .controls {
+  gap: 6px !important;
+  padding: 3px !important;
+  border: 1px solid #a8b3c1;
+  background: linear-gradient(#f7f9fc, #d7dee8);
+  box-shadow: inset 1px 1px #fff, inset -1px -1px #a1acba;
+}
+html.aura-embed .next-btn, html.aura-embed .leave-btn, html.aura-embed .send-btn {
+  min-height: 42px !important;
+  border: 1px outset #fff !important;
+  border-radius: 3px !important;
+  background: linear-gradient(#fff, #d3dbe6 60%, #bac5d3) !important;
+  color: #1e2e46 !important;
+  box-shadow: inset 1px 1px #fff, inset -1px -1px #9aa7b8 !important;
+  font: bold 11px Tahoma, Arial, sans-serif !important;
+  text-shadow: 0 1px #fff;
+}
+html.aura-embed .send-btn:not(:disabled) { background: linear-gradient(#edf6ff, #adc8e8 60%, #91acd0) !important; }
+html.aura-embed .composer textarea {
+  min-height: 42px !important;
+  height: 42px !important;
+  border: 2px inset #aeb8c5 !important;
+  border-radius: 2px !important;
+  background: #fff !important;
+  color: #172033 !important;
+  box-shadow: inset 1px 1px #9da8b7 !important;
+  font: 13px Tahoma, Arial, sans-serif !important;
+}
+html.aura-embed .composer textarea:focus { border-color: #5476a8 !important; }
+
+/* Connection chooser as a polished settings window. */
+html.aura-embed .prechat-choice {
+  width: min(100%, 460px) !important;
+  align-items: stretch !important;
+  padding: 0 12px 12px !important;
+  border: 2px outset #aeb9c7 !important;
+  border-radius: 2px !important;
+  background: linear-gradient(145deg, #fff, #e3e9f1) !important;
+  color: #19263b;
+  box-shadow: 3px 5px 16px #60718b44 !important;
+  text-align: left !important;
+  gap: 9px !important;
+}
+html.aura-embed .prechat-choice::before {
+  content: "CONNECTION SETTINGS";
+  width: calc(100% + 24px);
+  height: 24px;
+  display: flex;
+  align-items: center;
+  margin: 0 -12px 5px;
+  padding: 0 8px;
+  border-bottom: 1px solid #b7c8df;
+  background: linear-gradient(90deg, #7295c8, #426895 70%, #31547f);
+  color: #fff;
+  font: bold 10px Tahoma, Arial, sans-serif;
+  letter-spacing: .05em;
+  text-shadow: 1px 1px #304a6d;
+}
+html.aura-embed .prechat-eyebrow { color: #42618e !important; font: bold 9px Tahoma, Arial, sans-serif !important; }
+html.aura-embed .prechat-choice h2 { color: #1a2b46 !important; font: bold 20px Tahoma, Arial, sans-serif !important; text-shadow: 0 1px #fff; }
+html.aura-embed .prechat-subtitle { color: #58677a !important; font: 12px Tahoma, Arial, sans-serif !important; }
+html.aura-embed .prechat-target-options button {
+  border: 1px outset #fff !important;
+  border-radius: 3px !important;
+  background: linear-gradient(#fff, #d0d9e5) !important;
+  color: #263951 !important;
+  box-shadow: inset 1px 1px #fff, inset -1px -1px #9daaba !important;
+  font: bold 12px Tahoma, Arial, sans-serif !important;
+}
+html.aura-embed .prechat-target-options button.selected { border-style: inset !important; background: #c9def8 !important; color: #183b68 !important; }
+html.aura-embed .prechat-privacy-note { color: #65758a !important; font: 10px Tahoma, Arial, sans-serif !important; }
+
+/* Matching pale chrome panels for video and the remaining existing pages. */
+#video-chat-app .vc-header {
+  height: 56px;
+  border: 1px solid #a0acba;
+  border-top-color: #fff;
+  background: linear-gradient(#fff, #e6edf7 20%, #b8c7db 49%, #f4f6f9 53%, #cad2de);
+  box-shadow: inset 1px 1px #fff, inset -1px -1px #9da8b6, 0 4px 12px #75849a33;
+}
+#video-chat-app .vc-live-room, #video-chat-app .vc-stage, #video-chat-app .vc-side {
+  border: 2px outset #aeb9c7;
+  border-radius: 3px;
+  background: #edf2f8;
+  box-shadow: inset 1px 1px #fff, inset -1px -1px #a3afbe, 2px 4px 14px #60718b33;
+}
+#video-chat-app .vc-remote-empty { background: radial-gradient(ellipse at 50% 35%, #e8f1fb, #b9c8db 75%); color: #203654; }
+#socialApp .site-header, #socialApp .bottom-nav { border-color: #aab5c3; background: linear-gradient(#fff, #e5ebf3 48%, #bcc7d5); box-shadow: inset 1px 1px #fff, inset -1px -1px #a1adbb; }
+#socialApp .event-post, #socialApp .compose-sheet, #socialApp .poll-modal,
+#socialApp .matching-demo, #socialApp .analytics-panel, #socialApp .notes-preview {
+  border: 2px outset #aeb9c7;
+  border-radius: 3px;
+  background: linear-gradient(145deg, #fff, #e7ecf3);
+  color: #1c2b42;
+  box-shadow: inset 1px 1px #fff, inset -1px -1px #a5afbc, 2px 4px 12px #60718b33;
+}
+#socialApp .nav-icon { filter: saturate(.65); }
+.linktree { background: radial-gradient(ellipse at 50% 0, #fff, #e5edf7 58%, #c8d3e1) !important; }
+.linktree-atmosphere img { filter: grayscale(.45) brightness(1.18) contrast(.95) !important; opacity: .28; }
+.linktree-wordmark, .linktree h1 { color: #1c2e4b !important; text-shadow: 0 1px #fff, 0 2px #aab6c6 !important; }
+.linktree-wordmark { width: min(340px, 68vw); display: block !important; margin-inline: auto; }
+.linktree-wordmark img { display: block; width: 100%; height: auto; }
+.linktree-kicker, .linktree-description, .linktree-footer { color: #4c607d !important; }
+.linktree-link {
+  border: 2px outset #aeb9c7 !important;
+  border-radius: 4px !important;
+  background: linear-gradient(145deg, #fff, #edf2f8 46%, #cbd5e2) !important;
+  color: #1c2d47 !important;
+  box-shadow: inset 1px 1px #fff, inset -1px -1px #a3afbe, 2px 4px 12px #5d6e8733 !important;
+  backdrop-filter: none !important;
+}
+.linktree-link:hover { border-style: inset !important; }
+.linktree-icon { border: 2px outset #fff !important; border-radius: 4px !important; background: linear-gradient(#fff, #d9e2ee 52%, #aebbd0) !important; box-shadow: inset 1px 1px #fff, inset -1px -1px #99a6b7 !important; transform: none !important; }
+.linktree-icon::before { display: none; }
+.linktree-icon::after { border-radius: 1px !important; background: linear-gradient(145deg, #ffffff88, transparent 50%) !important; }
+.linktree-icon svg { filter: saturate(.55) drop-shadow(0 1px #fff) !important; }
+.chat-link,.school-link,.events-link,.account-link,.tellonym-link { --tile: #8da4c3 !important; --glow: transparent !important; }
+.linktree-link strong { color: #1f3454 !important; font-family: Tahoma, Arial, sans-serif; }
+.brand-intro-core img { display: block; width: clamp(250px, 52vw, 540px); height: auto; filter: drop-shadow(0 14px 24px #7890ad88); animation: logo-liquid-in .85s cubic-bezier(.16,1,.3,1) both; }
+#app .site-name-logo { display: block; width: 92px; height: 58px; object-fit: contain; }
+#app .brand-home-logo { display: block; width: 78px; height: 51px; object-fit: contain; }
+#video-chat-app .vc-logo { display: flex; align-items: center; width: 88px; height: 52px; }
+#video-chat-app .vc-logo img { display: block; width: 88px; height: 52px; object-fit: contain; }
+#socialApp .brand { display: block; width: 82px; height: 52px; object-fit: contain; }
+#socialApp .auth-wordmark { display: block; width: min(260px, 78%); height: auto; object-fit: contain; filter: drop-shadow(0 4px 9px #8ba2c477); }
+#socialApp .intro-logo-base, #socialApp .intro-logo-fragment { object-fit: contain; }
+@keyframes logo-liquid-in { from { opacity: 0; filter: blur(8px) drop-shadow(0 14px 24px #7890ad88); transform: translateY(10px) scale(.96); } to { opacity: 1; filter: drop-shadow(0 14px 24px #7890ad88); transform: none; } }
+
+@media (max-width: 640px) {
+  #chrome-app .page.account.account-signin { min-height: auto; align-items: flex-start; padding: 20px 0 30px; }
+  #chrome-app .account-signin .account-content { width: 100%; }
+  #chrome-app .auth-window-content { padding: 18px 16px 20px; }
+  #chrome-app .auth-brand img { width: 78px; height: 52px; }
+  #chrome-app .auth-heading { margin-bottom: 14px; }
+  #chrome-app .auth-heading h2 { font-size: 34px; }
+  #chrome-app .auth-window label { margin-top: 10px; }
+  #chrome-app .auth-window input { min-height: 43px; }
+  #chrome-app > header { height: 53px; min-height: 53px; padding: 5px 8px; }
+  #chrome-app .logo { width: 64px; height: 42px; min-width: 64px; }
+  #chrome-app .logo img { width: 64px; height: 42px; }
+  #video-chat-app .vc-logo { width: 70px; height: 42px; }
+  #video-chat-app .vc-logo img { width: 70px; height: 42px; }
+  #chrome-app .circle { width: 30px; height: 29px; }
+  #chrome-app main#main.is-anonymous-chat .anonymous-chat-shell { padding-top: 24px; }
+  #chrome-app .anonymous-chat-page .chat-topline { padding: 8px !important; }
+  #chrome-app .anonymous-chat-page .chat-topline h1 { font-size: clamp(17px, 4.8vw, 23px) !important; }
+  html.aura-embed .chat-window { padding: 5px !important; gap: 5px !important; }
+  html.aura-embed .transcript { padding: 28px 8px 8px !important; }
+  html.aura-embed .prechat-choice { padding-inline: 9px !important; }
+  html.aura-embed .prechat-choice::before { width: calc(100% + 18px); margin-inline: -9px; }
+  html.aura-embed .composer textarea { height: 52px !important; min-height: 52px !important; }
+  html.aura-embed .next-btn, html.aura-embed .leave-btn, html.aura-embed .send-btn { min-height: 52px !important; }
+}
+
+/* Anonymous chat: remove duplicate heading/title bar and let the live chat fill the page. */
+#chrome-app main#main.is-anonymous-chat .anonymous-chat-page .chat-topline{display:none!important}
+#chrome-app main#main.is-anonymous-chat .anonymous-chat-shell{display:flex!important;flex-direction:column;min-height:0!important;padding-top:0!important;border:0!important;border-radius:0!important;background:#000!important;box-shadow:none!important}
+#chrome-app main#main.is-anonymous-chat .anonymous-chat-shell::before,
+#chrome-app main#main.is-anonymous-chat .anonymous-chat-shell::after{display:none!important;content:none!important}
+#chrome-app main#main.is-anonymous-chat .anonymous-chat-frame{display:block;flex:1 1 auto;width:100%;height:100%;min-height:0;border:0!important;border-radius:0!important;background:#000}
+
+/* Compact mobile sizing for the full-site chat and its embedded chat client. */
+@media(max-width:759px){
+  #chrome-app>header{height:47px;min-height:47px;padding:3px 8px;gap:6px}
+  #chrome-app .logo,#chrome-app .logo img{width:62px;height:40px;min-width:62px}
+  #chrome-app .header-actions{gap:4px}
+  #chrome-app .circle{width:29px;height:28px}
+  #chrome-app .circle svg{width:15px;height:15px}
+  #chrome-app .bottom-nav{height:calc(56px + env(safe-area-inset-bottom));padding:3px 4px calc(3px + env(safe-area-inset-bottom));gap:3px}
+  #chrome-app .bottom-nav a{gap:2px;font-size:9px}
+  #chrome-app .bottom-nav a svg{width:16px;height:16px}
+  #chrome-app main#main.is-anonymous-chat{height:calc(100svh - 47px - 56px - env(safe-area-inset-bottom));min-height:0;padding:0!important}
+  #chrome-app main#main.is-anonymous-chat .anonymous-chat-shell{margin:0;min-height:0}
+  #chrome-app main#main.is-anonymous-chat .anonymous-chat-frame{min-height:0}
+  html.aura-embed .chat-window{padding:4px 5px calc(5px + env(safe-area-inset-bottom))!important;gap:4px!important}
+  html.aura-embed .status-row{min-height:30px!important;padding:3px 7px!important;font-size:10px!important}
+  html.aura-embed .chat-online-badge{padding-left:6px;font-size:8px!important}
+  html.aura-embed .transcript{padding:24px 8px 7px!important}
+  html.aura-embed .chat-line{font-size:13px!important;line-height:1.35!important}
+  html.aura-embed .message-author{font-size:9px!important}
+  html.aura-embed .message-bubble,html.aura-embed .typing-indicator{padding:6px 8px!important;font-size:12px!important}
+  html.aura-embed .prechat-choice{width:min(100%,340px)!important;padding:0 8px 8px!important;gap:7px!important}
+  html.aura-embed .prechat-choice:before{height:20px;margin-bottom:0;font-size:9px}
+  html.aura-embed .prechat-eyebrow{font-size:7px!important}
+  html.aura-embed .prechat-choice h2{font-size:18px!important;line-height:1.05!important}
+  html.aura-embed .prechat-subtitle{font-size:10px!important;line-height:1.3!important}
+  html.aura-embed .prechat-target-options{gap:4px!important}
+  html.aura-embed .prechat-target-options button{min-height:32px!important;padding:0 5px!important;font-size:9px!important}
+  html.aura-embed .prechat-privacy-note{font-size:8px!important;min-height:10px}
+  html.aura-embed .system-message strong{font-size:17px!important}
+  html.aura-embed .system-message span{font-size:12px!important}
+  html.aura-embed .controls{grid-template-columns:58px minmax(0,1fr)!important;grid-template-areas:"next composer" "leave composer"!important;gap:4px!important;padding:0!important}
+  html.aura-embed .next-btn,html.aura-embed .leave-btn{min-height:33px!important;border-radius:3px!important;font-size:9px!important}
+  html.aura-embed .composer{grid-template-columns:minmax(0,1fr) 58px!important;gap:4px!important}
+  html.aura-embed .composer textarea,html.aura-embed .send-btn{height:42px!important;min-height:42px!important;max-height:42px!important;padding:7px!important;border-radius:3px!important;font-size:11px!important}
+  html.aura-embed .composer{min-width:0}
+  html.aura-embed .send-btn{width:100%!important;min-width:0!important;padding:2px 0!important;overflow:hidden;font-size:9px!important;letter-spacing:0!important;white-space:nowrap}
+}
+@media(max-width:380px){
+  html.aura-embed .chat-window{padding-inline:4px!important}
+  html.aura-embed .controls{grid-template-columns:52px minmax(0,1fr)!important}
+  html.aura-embed .composer{grid-template-columns:minmax(0,1fr) 52px!important}
+  html.aura-embed .next-btn,html.aura-embed .leave-btn{font-size:8px!important}
+  html.aura-embed .send-btn{font-size:8px!important}
+  html.aura-embed .prechat-choice h2{font-size:17px!important}
+}
+
+#chrome-app > header .header-actions > button[data-action='search']{display:none!important}
+

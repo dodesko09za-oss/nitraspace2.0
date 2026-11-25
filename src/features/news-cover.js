@@ -25,7 +25,7 @@ export function fitCoverHeadline(title,{width=936,height=720,maxSize=160,minSize
  }
  throw Error('Nadpis je príliš dlhý pre túto obálku. Skráť ho alebo zruš ručné zalomenia.')
 }
-export function renderTypographicCover(a,format='feed',font=null,chromeHref='/chrome-sculpture.png',embeddedPhoto=null){
+export function renderTypographicCover(a,format='feed',font=null,chromeHref='/chrome-sculpture-optimized.webp',embeddedPhoto=null){
  const width=format==='og'?1200:1080,height=format==='og'?630:format==='story'?1920:1350,m=72,template=chooseTemplate(a),og=format==='og',story=format==='story'
  const title=a.cover_headline||a.visual_headline||a.headline||'NITRA SPACE',top=og?180:story?450:310,bottom=og?115:story?330:250,regionHeight=height-top-bottom,regionWidth=width-m*2-(template==='asymmetric'&&!og?100:0)
  const fit=fitCoverHeadline(title,{width:regionWidth,height:regionHeight,maxSize:og?116:174,minSize:og?32:42,measure:font?(s,size)=>font.getAdvanceWidth(s,size):undefined}),block=fit.lines.length*fit.lineHeight

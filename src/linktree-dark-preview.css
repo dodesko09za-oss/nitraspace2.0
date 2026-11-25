@@ -1,0 +1,131 @@
+:root {
+  color-scheme: dark;
+  background: #050608;
+}
+
+html,
+body {
+  min-height: 100%;
+  background: #050608;
+  color: #f3f6fa;
+}
+
+.linktree {
+  min-height: 100svh;
+  padding: clamp(28px, 6vh, 64px) 20px 30px;
+  background:
+    radial-gradient(ellipse at 50% 38%, #111923 0, #080a0d 44%, #030405 82%),
+    #050608;
+}
+
+.linktree-atmosphere {
+  display: block;
+  opacity: .16;
+}
+
+.linktree-atmosphere::after {
+  background: radial-gradient(ellipse at center, #05060820 0, #050608bd 69%, #050608 100%);
+}
+
+.linktree-atmosphere img {
+  width: min(1000px, 150vw);
+  opacity: .48;
+  filter: grayscale(1) brightness(1.5) contrast(1.18);
+}
+
+.linktree-content {
+  width: min(100%, 700px);
+}
+
+.linktree-wordmark {
+  display: inline-block;
+  width: min(300px, 66vw);
+  margin: 0 auto 28px;
+  filter: drop-shadow(0 4px 20px #6aaaff30);
+}
+
+.linktree-wordmark img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.linktree-links {
+  gap: 13px;
+}
+
+.linktree-link {
+  min-height: 128px;
+  border: 1px solid #d7e1ec3b;
+  border-radius: 15px;
+  background: linear-gradient(145deg, #252a30e8 0%, #111418f5 46%, #080a0ceF 100%);
+  box-shadow: inset 0 1px #ffffff20, inset 0 -1px #000c, 0 12px 28px #0009;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  color: #f2f5f7;
+}
+
+.linktree-link:hover,
+.linktree-link:focus-visible {
+  transform: translateY(-3px);
+  border-color: #91bce784;
+  background: linear-gradient(145deg, #303945f2, #101318 72%);
+  box-shadow: inset 0 1px #ffffff33, 0 15px 34px #000c, 0 0 22px #4098ff20;
+}
+
+.linktree-icon {
+  width: 62px;
+  height: 62px;
+  border: 1px solid #eef6ffb0;
+  border-radius: 16px;
+  box-shadow: inset 0 2px 1px #ffffffc7, inset 0 -8px 13px #0009, 0 1px 0 #ffffff80, 0 7px 14px #000c, 0 0 16px var(--glow);
+}
+
+.linktree-icon svg {
+  width: 39px;
+  height: 39px;
+}
+
+.linktree-link strong {
+  color: #f0f3f6;
+  font-size: 12px;
+  letter-spacing: .025em;
+}
+
+.linktree-footer {
+  color: #858d96;
+}
+
+.linktree-footer span {
+  color: #d3dae1;
+}
+
+@media (max-width: 620px) {
+  .linktree {
+    padding: 28px 18px calc(26px + env(safe-area-inset-bottom));
+  }
+
+  .linktree-wordmark {
+    width: min(250px, 66vw);
+    margin-bottom: 22px;
+  }
+
+  .linktree-links {
+    gap: 10px;
+  }
+
+  .linktree-link {
+    min-height: 112px;
+  }
+
+  .linktree-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 14px;
+  }
+
+  .linktree-icon svg {
+    width: 34px;
+    height: 34px;
+  }
+}

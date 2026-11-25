@@ -1,6 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
 import './social.css'
-import introLogo from './assets/nitra-logo.jpg?inline'
 
 const app = document.querySelector('#socialApp')
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
@@ -11,7 +10,6 @@ const EVENTS_KEY = 'nitra-space-redesign-events'
 const POLL_VOTER_KEY = 'nitra-space-poll-voter'
 const ANALYTICS_SESSION_KEY = 'nitra-space-analytics-session'
 let scrollObserver
-let introTimerStarted = false
 let pollOpenTimer
 let analyticsChannel
 
@@ -38,7 +36,6 @@ const state = {
   onlineCount: 0,
   editingEventId: null,
   composerOpen: false,
-  introVisible: true,
   poll: null,
   pollOpen: false,
   pollChoice: '',
@@ -48,7 +45,7 @@ const state = {
   pollHistoryLoading: false,
   pollHistoryError: '',
   activeSection: adminEntryRequested ? 'events' : (['board', 'events', 'future'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'board'),
-  theme: localStorage.getItem('nitra-space-redesign-theme') || 'light'
+  theme: localStorage.getItem('nitra-space-redesign-theme-black-20261122') || 'dark'
 }
 
 const localEventDrafts = state.events.slice()
@@ -660,9 +657,8 @@ function render(force = false) {
   document.documentElement.style.colorScheme = state.theme
   const sections = { board: boardSection, events: eventsSection, future: futureSection }
   app.innerHTML = `
-    ${state.introVisible ? `<div class="intro-splash" role="status" aria-label="Načítava sa Nitra Space"><div class="intro-logo-stage"><img class="intro-logo-base" src="${introLogo}" alt="Nitra Space"><img class="intro-logo-fragment fragment-left" src="${introLogo}" alt="" aria-hidden="true"><img class="intro-logo-fragment fragment-right" src="${introLogo}" alt="" aria-hidden="true"></div></div>` : ''}
     <header class="site-header">
-      <strong class="brand">Nitra Space</strong>
+      <img class="brand" src="/nitra-space-logo-optimized.webp" alt="Nitra Space">
       <div class="header-side"><button class="theme-button" data-theme-toggle aria-label="Prepnúť farebný režim">${state.theme === 'dark' ? '☀' : '☾'}</button></div>
     </header>
     <main class="app-content">${sections[state.activeSection]()}</main>
@@ -674,14 +670,6 @@ function render(force = false) {
     ${pollModal()}
   `
   bind()
-  if (state.introVisible && !introTimerStarted) {
-    introTimerStarted = true
-    const duration = matchMedia('(prefers-reduced-motion: reduce)').matches ? 550 : 2750
-    window.setTimeout(() => {
-      state.introVisible = false
-      document.querySelector('.intro-splash')?.remove()
-    }, duration)
-  }
 }
 
 function setupScrollAnimations() {
@@ -789,7 +777,7 @@ function bind() {
 
   document.querySelector('[data-theme-toggle]')?.addEventListener('click', () => {
     state.theme = state.theme === 'dark' ? 'light' : 'dark'
-    localStorage.setItem('nitra-space-redesign-theme', state.theme)
+    localStorage.setItem('nitra-space-redesign-theme-black-20261122', state.theme)
     render()
   })
 

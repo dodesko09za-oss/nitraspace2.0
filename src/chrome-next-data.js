@@ -1,11 +1,14 @@
+import { getClerk, signOutClerk, syncClerkSessionToSupabase } from './features/clerk-auth.js'
+
 /**
- * Data bridge for the local preview. Pass the existing Supabase client once.
+ * Data bridge for the Nitra Space app. Pass the existing Supabase client once.
  * Reads resolve {status: 'ready'|'empty'|'guest'|'error', data, error}; the UI
  * sets its own 'loading' state before awaiting them. Errors are user-readable.
  * Mutations execute only when called, resolve their result, and throw on failure.
  * No demo records, invented counts, presence estimates, or compatibility scores.
  */
 export function createPreviewData(client) {
+  let pendingAuthFlow = null
   const configured = () => {
     if (!client) throw new Error('Pripojenie k Nitra Space nie je nastavené.')
     return client
@@ -143,20 +146,74 @@ export function createPreviewData(client) {
       return { status, conversationId }
     },
     async signIn({ email, password }) {
-      const data = unwrap(await configured().auth.signInWithPassword({ email: email.trim(), password }))
-      return { user: data.user, confirmationRequired: !data.session }
+      const clerk = await getClerk()
+      const flow = clerk.client.signIn.__internal_future
+      const result = await flow.password({ emailAddress: email.trim(), password })
+      if (result?.error) throw result.error
+      if (flow.status === 'needs_second_factor' || flow.status === 'needs_client_trust') {
+        if (!flow.supportedSecondFactors?.some(factor => factor.strategy === 'email_code')) throw new Error('Účet vyžaduje ďalšie overenie e-mailovým kódom.')
+        const sent = await flow.mfa.sendEmailCode()
+        if (sent?.error) throw sent.error
+        pendingAuthFlow = { type: 'signin', flow, email: email.trim() }
+        return { confirmationRequired: true, email: email.trim() }
+      }
+      if (flow.status !== 'complete') throw new Error('Clerk nedokončil prihlásenie. Skús to znova.')
+      const finalized = await flow.finalize()
+      if (finalized?.error) throw finalized.error
+      const linked = await syncClerkSessionToSupabase(configured())
+      if (linked.profileRequired) throw new Error(linked.message || 'Dokonči svoj Nitra Space profil.')
+      return { user: linked.user, confirmationRequired: false }
     },
-    async signUp({ email, password, name, username, birthDate }) {
-      const cutoff = new Date(); cutoff.setFullYear(cutoff.getFullYear() - 16)
-      const birth = new Date(birthDate)
-      if (!birthDate || Number.isNaN(birth.getTime()) || birth > cutoff) throw new Error('Komunitné účty sú od 16 rokov. Zadaj platný dátum narodenia.')
-      if (!/^[a-z0-9_]{3,24}$/.test(username)) throw new Error('Používateľské meno musí mať 3–24 malých písmen, číslic alebo podčiarkovníkov.')
-      if (!name?.trim()) throw new Error('Vyplň svoje meno.')
-      const data = unwrap(await configured().auth.signUp({ email: email.trim(), password,
-        options: { emailRedirectTo: location.origin + '/account', data: { display_name: name.trim(), username, birth_date: birthDate } } }))
-      return { user: data.user, confirmationRequired: !data.session }
+    async signUp({ email, password, username, birthDate }) {
+      if ([...String(password || '')].length < 8) throw new Error('Heslo musí mať aspoň 8 znakov.')
+      const normalizedUsername = String(username || '').trim().toLowerCase()
+      const birth = new Date(`${birthDate}T00:00:00Z`)
+      const cutoff = new Date(); cutoff.setUTCFullYear(cutoff.getUTCFullYear() - 16)
+      if (!birthDate || Number.isNaN(birth.getTime()) || birth > cutoff) throw new Error('Účet je dostupný od 16 rokov. Zadaj platný dátum narodenia.')
+      if (!/^(?=.*[a-z_])[a-z0-9_]{4,24}$/.test(normalizedUsername)) throw new Error('Používateľské meno: 4 až 24 znakov, aspoň jedno písmeno, malé písmená, čísla alebo podčiarkovník.')
+      const profile = { display_name: normalizedUsername, username: normalizedUsername, birth_date: birthDate }
+      const clerk = await getClerk()
+      const flow = clerk.client.signUp.__internal_future
+      const result = await flow.password({ emailAddress: email.trim(), password, username: normalizedUsername, unsafeMetadata: { nitra_profile: profile } })
+      if (result?.error) throw result.error
+      if (flow.username !== normalizedUsername || flow.missingFields?.includes('username')) {
+        const usernameResult = await flow.update({ username: normalizedUsername })
+        if (usernameResult?.error) throw usernameResult.error
+      }
+      if (flow.username !== normalizedUsername || flow.missingFields?.includes('username')) {
+        throw new Error('Clerk neuložil používateľské meno. Skontroluj, či je v Clerk → User & authentication → Username zapnuté používateľské meno.')
+      }
+      const sent = await flow.verifications.sendEmailCode()
+      if (sent?.error) throw sent.error
+      pendingAuthFlow = { type: 'signup', flow, email: email.trim(), profile }
+      return { confirmationRequired: true, email: email.trim() }
     },
-    async signOut() { unwrap(await configured().auth.signOut()) },
+    async verifyAuthCode(code) {
+      if (!pendingAuthFlow) throw new Error('Registrácia vypršala. Začni znova.')
+      const pending = pendingAuthFlow
+      const result = pending.type === 'signup'
+        ? await pending.flow.verifications.verifyEmailCode({ code: String(code).trim() })
+        : await pending.flow.mfa.verifyEmailCode({ code: String(code).trim() })
+      if (result?.error) throw result.error
+      if (pending.flow.status !== 'complete') throw new Error('Kód ešte nebol prijatý. Skontroluj ho a skús znova.')
+      const finalized = await pending.flow.finalize()
+      if (finalized?.error) throw finalized.error
+      const linked = await syncClerkSessionToSupabase(configured(), pending.profile || null)
+      if (linked.profileRequired) throw new Error(linked.message || 'Dokonči svoj Nitra Space profil.')
+      pendingAuthFlow = null
+      return linked.user
+    },
+    async resendAuthCode() {
+      if (!pendingAuthFlow) throw new Error('Registrácia vypršala. Začni znova.')
+      const result = pendingAuthFlow.type === 'signup'
+        ? await pendingAuthFlow.flow.verifications.sendEmailCode()
+        : await pendingAuthFlow.flow.mfa.sendEmailCode()
+      if (result?.error) throw result.error
+    },
+    async signOut() {
+      try { await signOutClerk() } catch {}
+      unwrap(await configured().auth.signOut())
+    },
     async updateProfile({ name, username, bio, interests, discoverable, showOnline }) {
       const user = await requireUser()
       const patch = {}
@@ -180,3 +237,4 @@ export function createPreviewData(client) {
   }
   return api
 }
+

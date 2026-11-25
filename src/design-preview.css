@@ -75,6 +75,7 @@ body::before {
 .aura-app { min-height: 100dvh; padding-bottom: calc(92px + env(safe-area-inset-bottom)); }
 .aura-header { position: sticky; z-index: 30; top: 0; height: 72px; display: flex; align-items: center; justify-content: space-between; padding: 0 max(18px, calc((100vw - 1180px) / 2)); border-bottom: 1px solid var(--line); background: color-mix(in srgb,var(--paper) 96%,transparent); box-shadow:0 1px 0 var(--paper); transition:height .22s ease,background-color .22s ease; }
 .wordmark { display: flex; align-items: center; gap: 11px; padding: 0; border: 0; background: none; color: var(--ink); }
+.wordmark img { display: block; width: 82px; height: 55px; object-fit: contain; }
 .wordmark b { display: grid; place-items: center; width: 35px; height: 35px; border-radius: 50%; background: var(--ink); color: var(--paper); font-family: 'Manrope', sans-serif; font-size: 16px; }
 .wordmark span { font-family: 'Manrope', sans-serif; font-size: 12px; font-weight: 800; letter-spacing: .13em; }
 .header-status { display: flex; align-items: center; gap: 8px; }

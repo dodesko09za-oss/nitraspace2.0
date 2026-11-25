@@ -1,5 +1,5 @@
 import './design-preview.css'
-import logo from './assets/nitra-logo.jpg?inline'
+const logo = '/nitra-space-logo-optimized.webp'
 import { createClient } from '@supabase/supabase-js'
 import './features/features.css'
 import {mount as mountFeature,cleanup as cleanupFeature} from './features/runtime.js'
@@ -97,7 +97,7 @@ function shell(content) {
     </div>
     <div class="aura-app">
       <header class="aura-header">
-        <button class="wordmark" data-admin-entry aria-label="Domov"><b>N</b><span>NITRA<br>SPACE</span></button>
+        <button class="wordmark" data-admin-entry aria-label="Domov"><img src="/nitra-space-logo-optimized.webp" alt="Nitra Space"></button>
         <nav class="home-desktop-nav" aria-label="Hlavná navigácia">
           <button data-section="board" class="active">Domov</button><button data-section="board">Novinky</button><button data-feature-url="/polls">Ankety</button><button data-section="meet">Chat</button><button data-feature-url="/people">Ľudia</button><button data-section="events">Eventy</button>
         </nav>

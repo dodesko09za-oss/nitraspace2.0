@@ -11,9 +11,9 @@ export function cleanup(){state.generation++;for(const fn of cleanups.splice(0))
 export async function requireUser(){if(state.user)return true;navigate('/account');return false}
 async function refreshAdmin(){state.admin=false;const id=state.user?.id;if(id){const r=await db.rpc('is_admin');if(state.user?.id===id)state.admin=r.data===true}}
 function announceAuth(){window.dispatchEvent(new Event('nitra-auth-change'))}
-export async function signOut(){
+export async function signOut(destination='/news'){
   const results=await Promise.allSettled([signOutClerk(),db?.auth.signOut({scope:'local'})])
-  state.user=null;state.admin=false;state.needsProfile=false;state.clerkUser=null;state.clerkError=null;announceAuth();navigate('/news')
+  state.user=null;state.admin=false;state.needsProfile=false;state.clerkUser=null;state.clerkError=null;announceAuth();navigate(typeof destination==='string'?destination:'/news')
   const failure=results.find(result=>result.status==='rejected')
   if(failure)notice(failure.reason?.message||'Odhlásenie sa nedokončilo úplne.')
 }

@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import '@fontsource/anton/latin-400.css'
 import './video-chat.css'
+import './mobile-inputs.css'
 import { selectVideoPair } from './video-chat-core.js'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
@@ -31,7 +32,7 @@ const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&a
 const notice = (text, error = false) => { const node = document.querySelector('[data-vc-notice]'); if (!node) return; node.textContent = text; node.classList.toggle('vc-error', error); clearTimeout(noticeTimer); noticeTimer = setTimeout(() => { node.textContent = ''; node.classList.remove('vc-error') }, 7000) }
 
 function shell() {
-  app.innerHTML = `<header class="vc-header"><a class="vc-logo" href="/space#chat"><span>NITRA</span><span>SPACE</span></a><nav class="vc-modes" aria-label="Typ chatu"><a href="/space#chat">Anonym chat</a><a class="active" aria-current="page" href="/video-chat.html">Video chat</a></nav></header>
+  app.innerHTML = `<header class="vc-header"><a class="vc-logo" href="/space#chat" aria-label="Nitra Space"><img src="/nitra-space-logo-optimized.webp" alt="Nitra Space"></a><nav class="vc-modes" aria-label="Typ chatu"><a href="/space#chat">Anonym chat</a><a class="active" aria-current="page" href="/video-chat.html">Video chat</a></nav></header>
   <main class="vc-wrap"><div class="vc-live-room"><div class="vc-stage"><video class="vc-remote" data-remote autoplay playsinline hidden></video><div class="vc-remote-empty" data-empty><div><b data-empty-title>VIDEO CHAT</b><span data-empty-copy>Zapni kameru a hľadaj človeka.</span></div></div>
   <div class="vc-local-wrap" hidden data-local-wrap><video class="vc-local" data-local autoplay muted playsinline></video><span class="vc-video-label">TY</span></div>
   <div class="vc-live-controls"><span class="vc-status"><i class="vc-dot" data-status-dot></i><strong data-status>Pripravený</strong></span><div class="vc-controls"><button class="vc-btn primary" data-start>Začať</button><button class="vc-btn" data-next hidden>Ďalší</button><button class="vc-btn" data-camera hidden>Kamera</button><button class="vc-btn" data-mic hidden>Mikrofón</button><button class="vc-btn danger" data-leave hidden>Ukončiť</button></div></div>

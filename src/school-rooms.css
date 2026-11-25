@@ -1,0 +1,56 @@
+.school-rooms-page{max-width:940px;margin:0 auto;padding-top:26px}
+.school-rooms-heading{padding:8px 0 24px;border-bottom:1px solid #ffffff20}
+.school-rooms-heading .section-heading,.school-room-heading .section-heading{display:block;color:#008cff;font-size:11px;font-weight:700;letter-spacing:.2em;margin-bottom:12px}
+.school-rooms-heading h1,.school-room-heading h1{font:400 clamp(56px,13vw,88px)/.91 Anton,Impact,sans-serif;letter-spacing:-.025em;color:#f7f7f7}
+.school-rooms-heading p,.school-room-heading p{margin-top:14px;color:#b8bec5;font-size:14px;line-height:1.5}
+.school-rooms-heading>small{display:block;margin-top:8px;color:#7f878f;font-size:11px;letter-spacing:.04em}
+.school-rooms-count{display:inline-flex;align-items:center;min-height:27px;margin-top:15px;padding:0 10px;border:1px solid #008cff45;border-radius:999px;color:#8bcaff;font:400 10px/1 Anton,Impact,sans-serif;letter-spacing:.12em}
+.school-rooms-status{min-height:28px;display:flex;align-items:center;gap:10px;margin-top:12px;color:#9099a1;font-size:11px;line-height:1.45}
+.school-rooms-status:empty{visibility:hidden}
+.school-rooms-status button{color:#bfe3ff;text-decoration:underline;text-underline-offset:3px}
+.school-room-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:2px}
+.school-room-card{min-width:0;min-height:84px;display:flex;align-items:center;gap:14px;padding:14px 16px;text-align:left;color:#f7f7f7;border:1px solid #ffffff24;border-radius:15px;background:linear-gradient(135deg,#111315,#070809);transition:border-color .16s ease,transform .16s ease,background .16s ease}
+.school-room-card:hover{border-color:#008cffaa;background:linear-gradient(135deg,#101923,#08090a);transform:translateY(-1px)}
+.school-room-card:focus-visible,.school-rooms-back:focus-visible,.school-rooms-status button:focus-visible{outline:2px solid #008cff;outline-offset:3px}
+.school-room-card>svg{margin-left:auto;color:#8ccfff;width:19px;height:19px}
+.school-room-number{flex:0 0 42px;width:42px;height:42px;display:grid;place-items:center;border:1px solid #ffffff28;border-radius:50%;font:400 20px/1 Anton,Impact,sans-serif;color:#9bd5ff}
+.school-room-card-copy{min-width:0;display:grid;gap:5px}
+.school-room-card-copy strong{font:400 21px/1.08 Anton,Impact,sans-serif;text-transform:uppercase;letter-spacing:.025em}
+.school-room-card-copy small{color:#929aa2;font-size:10px;letter-spacing:.07em;text-transform:uppercase}
+.school-room-error{grid-column:1/-1;padding:18px;border:1px solid #ff73734d;border-radius:14px;color:#ffb2b2;font-size:13px;line-height:1.55}
+.school-room-error button{display:block;margin-top:10px;color:#fff;text-decoration:underline;text-underline-offset:4px}
+.school-room-back{display:inline-flex;align-items:center;gap:8px;min-height:38px;padding:4px 0;color:#b7bec5;font-size:12px}
+.school-room-back svg{width:17px;height:17px;transform:rotate(180deg)}
+.school-rooms-back{position:relative;isolation:isolate;display:inline-flex;align-items:center;gap:10px;min-height:44px;margin:0 0 8px;padding:5px 17px 5px 7px;overflow:hidden;border:1px solid #ffffff58;border-radius:999px;background:linear-gradient(150deg,#353a3e 0%,#191d20 26%,#090a0b 72%,#262b30 100%);box-shadow:inset 0 1px 1px #ffffff8c,inset 0 -5px 9px #000a,0 7px 19px #0009;color:#f2f5f7;font:400 13px/1 Anton,Impact,sans-serif;letter-spacing:.075em;text-transform:uppercase;cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.school-rooms-back:after{position:absolute;z-index:-1;inset:0;border-radius:inherit;content:"";background:linear-gradient(118deg,#ffffff30 0%,transparent 35%,#8be4ff10 65%,transparent 78%);pointer-events:none}
+.school-rooms-back svg{width:29px;height:29px;padding:5px;transform:rotate(180deg);border:1px solid #ffffff72;border-radius:50%;background:linear-gradient(145deg,#a8f4ff,#367cc7 48%,#26364b);box-shadow:inset 0 1px #fff,inset 0 -3px 5px #14243c,0 2px 5px #0009;color:#fff}
+.school-rooms-back:hover{transform:translateY(-1px);border-color:#baf2ff;box-shadow:inset 0 1px 1px #fff,inset 0 -5px 9px #000a,0 0 16px #36baff42,0 9px 22px #000b}
+.school-rooms-back:active{transform:translateY(1px) scale(.985)}
+.school-room-heading{padding:12px 0 18px;border-bottom:1px solid #ffffff20}
+.school-room-heading h1{font-size:clamp(48px,10vw,70px)}
+.school-room-heading p{margin-top:8px;font-size:12px}
+.school-room-panel{min-height:58svh;max-height:calc(100svh - 260px);display:flex;flex-direction:column;margin-top:15px;padding:14px;border:1px solid #ffffff25;border-radius:18px;background:linear-gradient(155deg,#0e1012,#050606);box-shadow:0 18px 55px #0008}
+.school-room-messages{flex:1;min-height:38svh;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:4px 2px 12px;overscroll-behavior:contain;scrollbar-color:#454a4f transparent}
+.school-room-message{align-self:flex-start;max-width:min(82%,620px);padding:10px 13px;border:1px solid #ffffff20;border-radius:15px 15px 15px 4px;background:#17191b}
+.school-room-message.mine{align-self:flex-end;border-color:#008cff70;border-radius:15px 15px 4px 15px;background:#071726}
+.school-room-message>div{display:flex;align-items:center;gap:10px;margin-bottom:5px}
+.school-room-message strong{color:#a6d9ff;font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.school-room-message time{color:#858c92;font-size:9px}
+.school-room-message p{color:#f1f2f3;font-size:14px;line-height:1.45;overflow-wrap:anywhere;white-space:pre-wrap}
+.school-room-empty{margin:auto;color:#8e969e;text-align:center;font-size:13px;line-height:1.5}
+.school-room-form{display:flex;align-items:center;gap:9px;padding-top:10px;border-top:1px solid #ffffff17}
+.school-room-form input{min-width:0;flex:1;height:48px;min-height:48px;margin:0;border-radius:999px;padding:0 16px;background:#090a0b}
+.school-room-form .primary{width:auto;min-width:122px;min-height:48px;margin:0;padding:0 17px;font-size:12px}
+.school-room-chat-page{max-width:none;width:100%;min-height:calc(100svh - 150px);display:flex;flex-direction:column;padding:12px clamp(12px,2vw,28px) 0}
+.school-room-heading{flex:0 0 auto;padding:4px 0 12px}.school-room-heading h1{font-size:clamp(32px,5vw,54px)}.school-room-heading p{margin-top:5px;font-size:12px}
+.school-room-chat{flex:1;min-height:360px;display:flex;flex-direction:column;gap:9px;padding-top:10px}
+.school-room-live{min-height:38px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 13px;border:1px solid #ffffff24;border-radius:10px;background:#080808;color:#d0d0d0;font:400 13px Anton,Impact,sans-serif}
+.school-room-live>span{display:flex;align-items:center;gap:8px}.school-room-live i{width:8px;height:8px;border-radius:50%;background:#aaa}.school-room-online{padding-left:12px;border-left:1px solid #ffffff24;letter-spacing:.05em}.school-room-online i{background:#008cff;box-shadow:0 0 10px #008cff}
+.school-room-messages{flex:1;min-height:0;padding:18px 16px;border:0;border-radius:0;background:#000;box-shadow:none}
+.school-room-form{display:grid;grid-template-columns:78px minmax(0,1fr) 88px 76px;gap:8px;padding:0;border:0}
+.school-room-form input,.school-room-form button{min-width:0;min-height:52px;height:52px;border:1px solid #ffffff30;border-radius:13px;background:#080808;color:#f2f2f2;font:400 13px Anton,Impact,sans-serif;letter-spacing:.04em}
+.school-room-form input{padding:0 14px;font:400 15px Anton,Impact,sans-serif}.school-room-send{background:#f4f4f4!important;color:#080808!important}.school-room-next:hover,.school-room-leave:hover{border-color:#fff}
+@media(max-width:600px){.school-room-chat-page{min-height:calc(100svh - 146px);padding:8px 10px 0}.school-room-chat{min-height:calc(100svh - 280px)}.school-room-form{grid-template-columns:64px minmax(0,1fr) 62px;grid-template-areas:'next input send' 'leave input send';gap:5px}.school-room-next{grid-area:next}.school-room-leave{grid-area:leave}.school-room-form input{grid-area:input;height:83px;min-height:83px;padding:9px}.school-room-send{grid-area:send;height:83px;min-height:83px;font-size:11px!important}.school-room-form button{min-height:39px;height:39px;border-radius:11px;font-size:11px}}
+@media(max-width:800px){.school-room-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.school-rooms-page{padding-top:16px}.school-rooms-heading{padding-bottom:18px}.school-rooms-heading h1{font-size:clamp(50px,16vw,76px)}.school-rooms-heading p{font-size:13px}.school-room-list{grid-template-columns:1fr;gap:8px;margin-top:2px}.school-room-card{min-height:72px;padding:11px 13px}.school-room-number{flex-basis:38px;width:38px;height:38px}.school-room-panel{min-height:calc(100svh - 300px);max-height:calc(100svh - 270px);padding:10px}.school-room-messages{min-height:35svh}.school-room-form{gap:7px}.school-room-form input{height:46px;min-height:46px;padding-inline:13px}.school-room-form .primary{min-width:94px;min-height:46px;padding-inline:11px;font-size:10px}.school-room-form .primary svg{width:16px;height:16px}}
+@media(prefers-reduced-motion:reduce){.school-room-card,.school-rooms-back{transition:none}}

@@ -2,7 +2,9 @@ import { createClient } from '@supabase/supabase-js'
 import '@fontsource/anton/latin-400.css'
 import '@fontsource/anton/latin-ext-400.css'
 import './style.css'
-import { selectCompatiblePairs } from './chat-matching.js'
+import './mobile-inputs.css'
+import './prechat-picker.css'
+import { areChatPreferencesCompatible, selectCompatiblePairs } from './chat-matching.js'
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
@@ -38,6 +40,8 @@ let state = genderSelectionEnabled ? 'choosing' : 'searching'
 let isStopping = false
 let partnerPresent = false
 let messages = []
+let replyTo = null
+const previewReactions = import.meta.env.DEV && location.search.includes('preview-reactions')
 let onlineCount = 1
 let onlineChannel = null
 let partnerTyping = false
@@ -49,6 +53,10 @@ let lobbyChannel = null
 let pairingInProgress = false
 let lobbyOfferSent = false
 let lobbyPairTimer = null
+let lobbyRetryTimer = null
+let lobbyOfferTimeout = null
+let roomJoinTimer = null
+let pendingPairRoomId = null
 
 const typingIdleDelay = 1200
 const typingHeartbeatDelay = 800
@@ -57,7 +65,7 @@ const partnerTypingFallbackDelay = 2200
 const app = document.querySelector('#app')
 const embeddedChat = new URLSearchParams(window.location.search).has('embed')
 if (embeddedChat) document.documentElement.classList.add('aura-embed')
-const themeKey = 'nitra-space-chat-theme'
+const themeKey = 'nitra-space-chat-theme-black-20261122'
 const requestedReturnPath = new URLSearchParams(window.location.search).get('return')
 const returnPath = requestedReturnPath?.startsWith('/') && !requestedReturnPath.startsWith('//')
   ? requestedReturnPath
@@ -91,7 +99,7 @@ function updateVisualViewport() {
 function getPreferredTheme() {
   const savedTheme = localStorage.getItem(themeKey)
   if (savedTheme === 'light' || savedTheme === 'dark') return savedTheme
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  return 'dark'
 }
 
 function applyTheme(theme) {
@@ -171,7 +179,7 @@ function renderHome() {
   app.innerHTML = `
     <main class="home-shell">
       <header class="site-header">
-        <strong class="site-name">Nitra Space Chat</strong>
+        <img class="site-name-logo" src="/nitra-space-logo-optimized.webp" alt="Nitra Space">
         <div class="site-actions">
           <div class="online-badge" aria-live="polite">
             <span class="online-dot" aria-hidden="true"></span>
@@ -273,6 +281,7 @@ function renderHome() {
 }
 
 function renderChat() {
+  if (state !== 'connected') replyTo = null
   const statusText = state === 'searching'
     ? 'Čakám na človeka...'
     : state === 'choosing'
@@ -285,7 +294,7 @@ function renderChat() {
     <main class="chat-page">
       ${embeddedChat ? '' : `<header class="chat-header">
         <button id="brandHome" class="brand-home" type="button" aria-label="Späť na úvod">
-          <strong>Nitra Space Chat</strong>
+          <img class="brand-home-logo" src="/nitra-space-logo-optimized.webp" alt="Nitra Space">
         </button>
         <div class="header-right">
           <span class="online-badge online-badge-header" aria-live="polite">
@@ -306,7 +315,7 @@ function renderChat() {
           ${transcriptTemplate()}
         </div>
 
-        <div class="controls">
+        <div class="reply-preview" id="reply-preview" hidden></div><div class="controls">
           <button id="next" class="next-btn" type="button" ${genderSelectionEnabled && state === 'choosing' ? 'disabled' : ''}>${genderSelectionEnabled && state === 'choosing' ? 'HĽADAŤ' : 'ĎALŠÍ'}</button>
 
           <form id="composer" class="composer">
@@ -346,12 +355,16 @@ function renderChat() {
       button.addEventListener('click', () => {
         lookingForGender = button.dataset.chatLooking
         updateLookingChoice()
+        void startChat()
       })
     })
     document.querySelector('#next').addEventListener('click', startChat)
   } else {
     document.querySelector('#next').addEventListener('click', nextChat)
   }
+  document.querySelector('#messages').addEventListener('click', handleMessageAction)
+  document.querySelector('#reply-preview').onclick = () => { replyTo = null; updateReplyPreview() }
+  updateReplyPreview()
   document.querySelector('#composer').addEventListener('submit', sendMessage)
   bindThemeButtons()
 
@@ -372,7 +385,11 @@ function renderChat() {
 
   input?.addEventListener('focus', scheduleScrollToBottom)
 
-  if (state === 'connected') setTimeout(() => input?.focus(), 0)
+  // Do not open the mobile keyboard as soon as a match is made. Besides
+  // surprising users, focusing a control inside an iframe can scroll iOS Safari.
+  if (state === 'connected' && matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    setTimeout(() => input?.focus(), 0)
+  }
   scrollMessages()
 }
 
@@ -412,11 +429,47 @@ function emptyTranscript() {
 }
 
 function messageTemplate(message) {
+  const liked = message.liked || message.partnerLiked
+  const id = escapeHtml(message.id)
   return `
     <div class="chat-line ${message.mine ? 'mine' : 'theirs'}">
       <span class="message-author">${message.mine ? 'Ty' : 'Cudzí'}</span>
-      <div class="message-bubble">${escapeHtml(message.text)}</div>
+      <div class="message-with-actions">
+        <div class="message-bubble-stack">
+          <div class="message-bubble">${message.quote ? `<span class="message-quote">${escapeHtml(message.quote)}</span>` : ''}${escapeHtml(message.text)}</div>
+          ${liked ? '<span class="message-like-badge" role="img" aria-label="Správa má lajk">❤️</span>' : ''}
+        </div>
+        <div class="message-actions">
+          ${message.mine ? '' : `<button type="button" data-like="${id}" aria-label="Páči sa mi správa" aria-pressed="${Boolean(message.liked)}" class="${message.liked ? 'has-like' : ''}">${message.liked ? '♥' : '♡'}</button>`}
+          <button type="button" data-reply="${id}" aria-label="Odpovedať na správu">↩</button>
+        </div>
+      </div>
     </div>`
+}
+
+function updateReplyPreview() {
+  const preview = document.querySelector('#reply-preview')
+  preview.hidden = !replyTo
+  preview.innerHTML = replyTo
+    ? `<span>Odpoveď: ${escapeHtml(replyTo.text.slice(0, 160))}</span><button type="button" aria-label="Zrušiť odpoveď">×</button>`
+    : ''
+}
+
+function handleMessageAction(event) {
+  const button = event.target.closest('button')
+  if (!button || state !== 'connected') return
+  const message = messages.find(item => item.id === (button.dataset.like || button.dataset.reply))
+  if (!message) return
+  if (button.dataset.reply) {
+    replyTo = message
+    updateReplyPreview()
+    document.querySelector('#message').focus({ preventScroll: true })
+    return
+  }
+  if (message.mine) return
+  message.liked = !message.liked
+  refreshMessages(false)
+  void broadcast('reaction', { message_id: message.id, liked: message.liked })
 }
 
 function typingTemplate() {
@@ -506,12 +559,19 @@ function escapeHtml(value) {
 
 function setStatus(nextState) {
   state = nextState
+  if (nextState !== 'searching' && roomJoinTimer) {
+    clearTimeout(roomJoinTimer)
+    roomJoinTimer = null
+  }
   render()
 }
 
 async function startChat() {
   if (isStopping) return
+  clearTimeout(roomJoinTimer)
+  roomJoinTimer = null
   pairingInProgress = false
+  pendingPairRoomId = null
   resetTypingState()
   state = 'searching'
   messages = []
@@ -521,58 +581,84 @@ async function startChat() {
 }
 
 async function findPartner() {
+  clearLobbyTimers()
   if (lobbyChannel) await supabase.removeChannel(lobbyChannel)
   lobbyOfferSent = false
+  pendingPairRoomId = null
   clearTimeout(lobbyPairTimer)
-  lobbyChannel = supabase.channel('nitra-space-anonymous-lobby', {
+  lobbyPairTimer = null
+  const currentLobby = supabase.channel('nitra-space-anonymous-lobby', {
     config: { presence: { key: sessionId } }
   })
-  lobbyChannel
+  lobbyChannel = currentLobby
+  const isCurrentLobby = () => lobbyChannel === currentLobby && state === 'searching' && !isStopping
+  currentLobby
     .on('presence', { event: 'sync' }, () => {
-      tryPairFromLobby()
+      if (isCurrentLobby()) tryPairFromLobby()
     })
     .on('broadcast', { event: 'pair-offer' }, async ({ payload }) => {
-      if (state !== 'searching' || pairingInProgress || payload?.partner !== sessionId) return
-      const currentLobby = lobbyChannel
-      if (!currentLobby) return
+      if (!isCurrentLobby() || pairingInProgress || payload?.partner !== sessionId || !payload?.initiator || !payload?.room_id) return
+      const presence = currentLobby.presenceState()
+      const initiatorMetaList = presence[payload.initiator] || []
+      const initiatorMeta = initiatorMetaList[initiatorMetaList.length - 1] || {}
+      const initiatorPreference = initiatorMeta.looking_for || payload.looking_for
+      if (!areChatPreferencesCompatible(
+        { looking_for: initiatorPreference },
+        { looking_for: lookingForGender || 'random' }
+      )) return
+      if (pendingPairRoomId && pendingPairRoomId !== payload.room_id) return
+      pendingPairRoomId = payload.room_id
+      lobbyOfferSent = true
+      armLobbyOfferTimeout(currentLobby, payload.room_id)
       const response = await currentLobby.send({
         type: 'broadcast',
         event: 'pair-accept',
         payload: { initiator: payload.initiator, partner: sessionId, room_id: payload.room_id }
       })
-      if (response !== 'ok') console.warn('Pair accept failed:', response)
+      if (!isCurrentLobby()) return
+      if (response !== 'ok') {
+        releaseLobbyOffer(currentLobby, payload.room_id)
+        console.warn('Pair accept failed:', response)
+      }
     })
     .on('broadcast', { event: 'pair-accept' }, async ({ payload }) => {
-      if (state !== 'searching' || pairingInProgress || payload?.initiator !== sessionId) return
-      const currentLobby = lobbyChannel
-      if (!currentLobby) return
+      if (!isCurrentLobby() || pairingInProgress || payload?.initiator !== sessionId || payload?.room_id !== pendingPairRoomId) return
+      clearTimeout(lobbyOfferTimeout)
+      armLobbyOfferTimeout(currentLobby, payload.room_id)
       const response = await currentLobby.send({
         type: 'broadcast',
         event: 'pair-commit',
         payload: { initiator: sessionId, partner: payload.partner, room_id: payload.room_id }
       })
+      if (!isCurrentLobby()) return
       if (response !== 'ok') {
-        lobbyOfferSent = false
+        releaseLobbyOffer(currentLobby, payload.room_id)
         console.warn('Pair commit failed:', response)
         return
       }
       scheduleLobbyPair(payload.partner, payload.room_id)
     })
     .on('broadcast', { event: 'pair-commit' }, ({ payload }) => {
-      if (state !== 'searching' || pairingInProgress) return
-      if (payload?.partner !== sessionId || !payload?.initiator || !payload?.room_id) return
+      if (!isCurrentLobby() || pairingInProgress) return
+      if (payload?.partner !== sessionId || !payload?.initiator || payload?.room_id !== pendingPairRoomId) return
       scheduleLobbyPair(payload.initiator, payload.room_id)
     })
     .subscribe(async status => {
+      if (!isCurrentLobby()) return
       if (status === 'SUBSCRIBED') {
         try {
-          await lobbyChannel?.track({
+          await currentLobby.track({
             session_id: sessionId,
             status: 'waiting',
             looking_for: lookingForGender || 'random',
             waiting_since: new Date().toISOString()
           })
+          if (isCurrentLobby()) {
+            tryPairFromLobby()
+            scheduleLobbyRetry(currentLobby)
+          }
         } catch (error) {
+          if (!isCurrentLobby()) return
           console.error('Lobby presence failed:', error)
           showFatal('Nepodarilo sa pripojiť k chatu.', error.message)
         }
@@ -583,8 +669,9 @@ async function findPartner() {
 }
 
 function tryPairFromLobby() {
-  if (state !== 'searching' || isStopping || pairingInProgress || lobbyOfferSent || !lobbyChannel) return
-  const presence = lobbyChannel.presenceState()
+  if (state !== 'searching' || isStopping || pairingInProgress || lobbyOfferSent || pendingPairRoomId || !lobbyChannel) return
+  const currentLobby = lobbyChannel
+  const presence = currentLobby.presenceState()
   const waiting = Object.entries(presence)
     .filter(([, metas]) => metas.some(meta => meta.status === 'waiting'))
     .map(([key, metas]) => ({ key, meta: metas[metas.length - 1] || {} }))
@@ -592,75 +679,141 @@ function tryPairFromLobby() {
   if (!pair) return
   const [first, second] = pair
   lobbyOfferSent = true
-  const room = [first.key, second.key].sort()
-  void lobbyChannel.send({
+  // Each attempt gets its own room topic so stale messages from a previous
+  // encounter between the same two browser sessions can never leak through.
+  const sharedRoomId = crypto.randomUUID()
+  pendingPairRoomId = sharedRoomId
+  armLobbyOfferTimeout(currentLobby, sharedRoomId)
+  void currentLobby.send({
     type: 'broadcast',
     event: 'pair-offer',
-    payload: { initiator: first.key, partner: second.key, room_id: `${room[0]}-${room[1]}` }
+    payload: { initiator: first.key, partner: second.key, room_id: sharedRoomId, looking_for: first.meta.looking_for || 'random' }
   }).then(response => {
+    if (lobbyChannel !== currentLobby || pendingPairRoomId !== sharedRoomId) return
     if (response !== 'ok') {
-      lobbyOfferSent = false
+      releaseLobbyOffer(currentLobby, sharedRoomId)
       console.warn('Pair offer failed:', response)
     }
   }).catch(error => {
-    lobbyOfferSent = false
+    if (lobbyChannel === currentLobby && pendingPairRoomId === sharedRoomId) releaseLobbyOffer(currentLobby, sharedRoomId)
     console.warn('Pair offer failed:', error)
   })
 }
 
+function scheduleLobbyRetry(currentLobby) {
+  clearTimeout(lobbyRetryTimer)
+  lobbyRetryTimer = setTimeout(() => {
+    lobbyRetryTimer = null
+    if (lobbyChannel !== currentLobby || state !== 'searching' || isStopping) return
+    tryPairFromLobby()
+    scheduleLobbyRetry(currentLobby)
+  }, 1000)
+}
+
+function armLobbyOfferTimeout(currentLobby, sharedRoomId) {
+  clearTimeout(lobbyOfferTimeout)
+  lobbyOfferTimeout = setTimeout(() => {
+    lobbyOfferTimeout = null
+    if (lobbyChannel !== currentLobby || pendingPairRoomId !== sharedRoomId || state !== 'searching') return
+    releaseLobbyOffer(currentLobby, sharedRoomId)
+  }, 5000)
+}
+
+function releaseLobbyOffer(currentLobby, sharedRoomId) {
+  if (lobbyChannel !== currentLobby || pendingPairRoomId !== sharedRoomId) return
+  clearTimeout(lobbyOfferTimeout)
+  lobbyOfferTimeout = null
+  pendingPairRoomId = null
+  lobbyOfferSent = false
+}
+
+function clearLobbyTimers() {
+  clearTimeout(lobbyRetryTimer)
+  clearTimeout(lobbyOfferTimeout)
+  lobbyRetryTimer = null
+  lobbyOfferTimeout = null
+}
+
 function scheduleLobbyPair(partnerSessionId, sharedRoomId) {
   if (lobbyPairTimer || state !== 'searching' || pairingInProgress) return
-  // Give both clients time to receive the commit before either leaves Presence.
+  clearLobbyTimers()
+  // Let both clients receive the commit before they leave lobby Presence.
   lobbyPairTimer = setTimeout(() => {
     lobbyPairTimer = null
     void pairFromLobby(partnerSessionId, sharedRoomId)
-  }, 180)
+  }, 100)
 }
 
 async function pairFromLobby(partnerSessionId, sharedRoomId) {
   if (pairingInProgress || state !== 'searching' || isStopping) return
   pairingInProgress = true
+  pendingPairRoomId = null
   roomId = sharedRoomId
   const oldLobby = lobbyChannel
   lobbyChannel = null
-  if (oldLobby) await supabase.removeChannel(oldLobby)
+  clearLobbyTimers()
   try {
+    if (oldLobby) void supabase.removeChannel(oldLobby).catch(error => console.warn('Lobby cleanup failed:', error))
     await joinRoom(partnerSessionId)
+    if (state === 'searching' && roomId === sharedRoomId) {
+      roomJoinTimer = setTimeout(() => {
+        roomJoinTimer = null
+        if (state === 'searching' && roomId === sharedRoomId && !isStopping) void recoverPairing(sharedRoomId)
+      }, 5000)
+    }
   } catch (error) {
     console.error(error)
-    pairingInProgress = false
-    lobbyOfferSent = false
-    showFatal('Nepodarilo sa pripojiť k chatu.', error.message)
+    await recoverPairing(sharedRoomId)
   }
 }
 
 async function joinRoom(partnerSessionId) {
-  if (channel) await supabase.removeChannel(channel)
+  if (channel) {
+    const previousRoom = channel
+    channel = null
+    await supabase.removeChannel(previousRoom)
+  }
 
-  partnerPresent = Boolean(partnerSessionId)
-  channel = supabase.channel(`chat:${roomId}`, {
+  const joinedRoomId = roomId
+  let partnerMissingTimer = null
+  partnerPresent = false
+  const currentRoom = supabase.channel(`chat:${joinedRoomId}`, {
     config: {
       broadcast: { self: false, ack: true },
       presence: { key: sessionId }
     }
   })
+  channel = currentRoom
 
-  channel
+  currentRoom
     .on('broadcast', { event: 'message' }, ({ payload }) => {
-      if (payload?.sender === sessionId) return
-      if (payload?.room_id !== roomId) return
+      if (channel !== currentRoom || roomId !== joinedRoomId || payload?.sender === sessionId) return
+      if (payload?.room_id !== joinedRoomId) return
       clearPartnerTypingTimer()
       partnerTyping = false
-      messages.push({ text: String(payload.text || ''), mine: false })
+      messages.push({
+        id: typeof payload.id === 'string' ? payload.id : crypto.randomUUID(),
+        text: String(payload.text || ''),
+        quote: messages.find(message => message.id === payload.reply_to)?.text.slice(0, 160),
+        mine: false
+      })
       refreshMessages()
     })
+    .on('broadcast', { event: 'reaction' }, ({ payload }) => {
+      if (channel !== currentRoom || payload?.room_id !== joinedRoomId || payload.sender === sessionId) return
+      const message = messages.find(item => item.id === payload.message_id)
+      if (!message) return
+      if (!message.mine) return
+      message.partnerLiked = payload.liked === true
+      refreshMessages(false)
+    })
     .on('broadcast', { event: 'typing' }, ({ payload }) => {
-      if (payload?.sender === sessionId) return
-      if (payload?.room_id !== roomId) return
+      if (channel !== currentRoom || roomId !== joinedRoomId || payload?.sender === sessionId) return
+      if (payload?.room_id !== joinedRoomId) return
       setPartnerTyping(payload?.typing === true)
     })
     .on('broadcast', { event: 'matched' }, ({ payload }) => {
-      if (payload?.room_id !== roomId) return
+      if (channel !== currentRoom || roomId !== joinedRoomId || payload?.room_id !== joinedRoomId) return
       clearPartnerTypingTimer()
       partnerTyping = false
       partnerPresent = true
@@ -668,52 +821,89 @@ async function joinRoom(partnerSessionId) {
       setStatus('connected')
     })
     .on('broadcast', { event: 'left' }, ({ payload }) => {
-      if (payload?.room_id !== roomId) return
+      if (channel !== currentRoom || roomId !== joinedRoomId || payload?.room_id !== joinedRoomId || payload.sender !== partnerSessionId) return
+      clearTimeout(partnerMissingTimer)
+      partnerMissingTimer = null
       partnerPresent = false
       clearPartnerTypingTimer()
       partnerTyping = false
       if (!isStopping) setStatus('ended')
     })
     .on('presence', { event: 'sync' }, () => {
-      const keys = Object.keys(channel.presenceState())
-      const hasPartner = keys.some(key => key !== sessionId)
+      if (channel !== currentRoom || roomId !== joinedRoomId) return
+      const hasPartner = Boolean(currentRoom.presenceState()[partnerSessionId]?.length)
       if (hasPartner) {
+        clearTimeout(partnerMissingTimer)
+        partnerMissingTimer = null
         partnerPresent = true
         pairingInProgress = false
         if (state !== 'connected') setStatus('connected')
-      } else if (state === 'connected' && partnerPresent && !isStopping) {
-        partnerPresent = false
-        clearPartnerTypingTimer()
-        partnerTyping = false
-        setStatus('ended')
-      }
-    })
-    .on('presence', { event: 'leave' }, ({ key }) => {
-      if (key !== sessionId && !isStopping && state === 'connected') {
-        partnerPresent = false
-        clearPartnerTypingTimer()
-        partnerTyping = false
-        setStatus('ended')
+      } else if (state === 'connected' && partnerPresent && !isStopping && partnerMissingTimer === null) {
+        // The match broadcast can arrive before the partner's Presence state.
+        partnerMissingTimer = setTimeout(() => {
+          partnerMissingTimer = null
+          if (channel !== currentRoom || roomId !== joinedRoomId || isStopping || state !== 'connected') return
+          if (currentRoom.presenceState()[partnerSessionId]?.length) return
+          partnerPresent = false
+          clearPartnerTypingTimer()
+          partnerTyping = false
+          setStatus('ended')
+        }, 3000)
       }
     })
 
   await new Promise((resolve, reject) => {
-    channel.subscribe(async status => {
+    const connectionTimeout = setTimeout(() => reject(new Error('Realtime status: ROOM_JOIN_TIMEOUT')), 5500)
+    const finish = () => {
+      clearTimeout(connectionTimeout)
+      resolve()
+    }
+    currentRoom.subscribe(async status => {
+      if (channel !== currentRoom || roomId !== joinedRoomId) return
       if (status === 'SUBSCRIBED') {
         try {
-          await channel.track({ session_id: sessionId })
+          await currentRoom.track({ session_id: sessionId })
           if (partnerSessionId) {
-            await broadcast('matched', {})
+            void broadcast('matched', {}).catch(error => console.warn('Match confirmation failed:', error))
           }
-          resolve()
+          finish()
         } catch (error) {
+          clearTimeout(connectionTimeout)
           reject(error)
         }
       } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+        clearTimeout(connectionTimeout)
         reject(new Error(`Realtime status: ${status}`))
       }
     })
   })
+}
+
+async function recoverPairing(failedRoomId) {
+  if (roomId !== failedRoomId || isStopping || state !== 'searching') return
+  isStopping = true
+  clearTimeout(roomJoinTimer)
+  roomJoinTimer = null
+  const failedRoom = channel
+  channel = null
+  roomId = null
+  partnerPresent = false
+  pairingInProgress = false
+  pendingPairRoomId = null
+  lobbyOfferSent = false
+  try {
+    if (failedRoom) await supabase.removeChannel(failedRoom)
+  } catch (error) {
+    console.warn('Failed room cleanup:', error)
+  } finally {
+    isStopping = false
+  }
+  state = 'searching'
+  messages = []
+  render()
+  setTimeout(() => {
+    if (state === 'searching' && !isStopping && !lobbyChannel) void findPartner()
+  }, 600)
 }
 
 async function broadcast(event, payload) {
@@ -728,27 +918,33 @@ async function broadcast(event, payload) {
 
 async function sendMessage(event) {
   event.preventDefault()
-  if (state !== 'connected' || !channel) return
+  if (state !== 'connected' || (!channel && !previewReactions)) return
 
   const input = document.querySelector('#message')
   const text = input.value.trim()
   if (!text) return
 
-  messages.push({ text, mine: true })
+  const id = crypto.randomUUID()
+  const replyId = replyTo?.id
+  messages.push({ id, text, quote: replyTo?.text.slice(0, 160), mine: true })
+  replyTo = null
+  updateReplyPreview()
   input.value = ''
   input.style.height = 'auto'
   await setLocalTyping(false)
   refreshMessages()
-  await broadcast('message', { text })
+  await broadcast('message', { id, text, reply_to: replyId })
   input.focus()
 }
 
-function refreshMessages() {
+function refreshMessages(scroll = true) {
   const list = document.querySelector('#messages')
   if (!list) return
   list.classList.toggle('is-empty', !messages.length && !partnerTyping)
+  const scrollTop = list.scrollTop
   list.innerHTML = transcriptTemplate()
-  scrollMessages()
+  if (scroll) scrollMessages()
+  else list.scrollTop = scrollTop
 }
 
 function scrollMessages() {
@@ -757,6 +953,9 @@ function scrollMessages() {
 }
 
 async function closeCurrentRoom() {
+  clearLobbyTimers()
+  clearTimeout(roomJoinTimer)
+  roomJoinTimer = null
   try {
     if (roomId) {
       await setLocalTyping(false)
@@ -777,6 +976,7 @@ async function closeCurrentRoom() {
     partnerPresent = false
     pairingInProgress = false
     lobbyOfferSent = false
+    pendingPairRoomId = null
     clearTimeout(lobbyPairTimer)
     lobbyPairTimer = null
     resetTypingState()
@@ -804,9 +1004,10 @@ async function leaveChat() {
     window.location.assign(returnPath)
     return
   }
-  state = 'home'
+  state = genderSelectionEnabled ? 'choosing' : 'home'
   messages = []
   partnerPresent = false
+  lookingForGender = null
   render()
 }
 
@@ -846,6 +1047,15 @@ if (window.visualViewport) {
   window.addEventListener('resize', updateVisualViewport, { passive: true })
 }
 
-render()
-if (!genderSelectionEnabled) startChat()
-setupOnlinePresence()
+if (previewReactions) {
+  state = 'connected'
+  messages = [
+    { id: 'demo-1', text: 'Ahoj! Kam chodíš v Nitre na kávu?', mine: false },
+    { id: 'demo-2', text: 'Najradšej niekam na pešiu zónu.', mine: true }
+  ]
+  render()
+} else {
+  render()
+  if (!genderSelectionEnabled) startChat()
+  setupOnlinePresence()
+}

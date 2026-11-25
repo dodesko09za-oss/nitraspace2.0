@@ -1,27 +1,46 @@
 *{box-sizing:border-box}
 html,body{min-height:100%;margin:0;background:#050607;color:#f5f6f7;font-family:Inter,Arial,sans-serif}
 body{min-height:100svh}
-.linktree{position:relative;isolation:isolate;display:grid;min-height:100svh;place-items:center;overflow:hidden;padding:34px 20px;background:radial-gradient(ellipse at 50% 40%,#151719 0,#08090a 46%,#030303 100%)}
+.linktree{position:relative;isolation:isolate;display:grid;min-height:100svh;place-items:center;overflow:hidden;padding:34px 20px;background:radial-gradient(ellipse at 50% 38%,#1a1d20 0,#0a0b0d 46%,#030303 100%)}
 .linktree-atmosphere{position:absolute;z-index:-1;inset:0;overflow:hidden;pointer-events:none}
-.linktree-atmosphere:after{position:absolute;inset:0;content:"";background:linear-gradient(180deg,#05060755,#050607d9 74%,#050607)}
-.linktree-atmosphere img{position:absolute;top:50%;left:50%;width:min(900px,150vw);opacity:.52;filter:grayscale(1) brightness(1.35) contrast(1.08);transform:translate(-50%,-48%);animation:linktree-drift 24s ease-in-out infinite alternate}
-.linktree-content{width:min(100%,470px);text-align:center;animation:linktree-arrive .8s cubic-bezier(.2,.8,.2,1) both}
-.linktree-wordmark{display:inline-grid;color:#f7f8fa;font:400 38px/.77 Anton,Impact,sans-serif;letter-spacing:-.035em;text-decoration:none;text-align:left;text-shadow:0 1px #8d969d,0 0 22px #fff2}
-.linktree-kicker{margin:28px 0 14px;color:#b9c1c9;font-size:10px;font-weight:600;letter-spacing:.3em}
-.linktree h1{margin:0;font:400 clamp(53px,14vw,86px)/.94 Anton,Impact,sans-serif;letter-spacing:-.025em;text-shadow:0 2px #70777d,0 0 24px #fff1}
-.linktree-description{margin:17px 0 31px;color:#b7bdc3;font-size:14px;letter-spacing:.03em}
-.linktree-links{display:grid;gap:12px}
-.linktree-link{display:flex;align-items:center;gap:14px;min-height:78px;padding:12px 16px;border:1px solid #ffffff38;border-radius:19px;background:linear-gradient(130deg,#ffffff1b,#ffffff08 58%,#ffffff12);box-shadow:inset 0 1px #ffffff38,0 12px 36px #0007;backdrop-filter:blur(22px) saturate(1.35);-webkit-backdrop-filter:blur(22px) saturate(1.35);color:#f5f6f7;text-align:left;text-decoration:none;transition:transform .2s ease,border-color .2s ease,background .2s ease}
-.linktree-link:hover,.linktree-link:focus-visible{transform:translateY(-2px);border-color:#ffffff8c;background:linear-gradient(130deg,#ffffff28,#ffffff0b 58%,#ffffff18);outline:none}
-.linktree-icon{display:grid;flex:0 0 44px;width:44px;height:44px;place-items:center;border:1px solid #ffffff70;border-radius:14px;background:linear-gradient(145deg,#ffffff25,#ffffff09);font:400 25px/1 Anton,Impact,sans-serif}
-.tellonym-icon{font-family:Inter,Arial,sans-serif;font-size:25px;font-weight:600}
-.linktree-copy{display:grid;flex:1;gap:5px;min-width:0}
-.linktree-copy strong{font-size:15px;font-weight:600}
-.linktree-copy small{color:#b8bec5;font-size:12px}
-.linktree-arrow{color:#e8edf1;font-size:22px}
-.linktree-footer{display:flex;justify-content:space-between;gap:12px;margin:34px 2px 0;color:#9099a1;font-size:9px;letter-spacing:.23em}
+.linktree-atmosphere:after{position:absolute;inset:0;content:"";background:radial-gradient(ellipse at 50% 46%,#05060725,#050607a6 75%,#050607f2)}
+.linktree-atmosphere img{position:absolute;top:50%;left:50%;width:min(1000px,145vw);opacity:.29;filter:grayscale(1) brightness(1.5) contrast(1.05);transform:translate(-50%,-48%);animation:linktree-drift 28s ease-in-out infinite alternate}
+.linktree-content{width:min(100%,660px);text-align:center;animation:linktree-arrive .7s cubic-bezier(.2,.8,.2,1) both}
+.linktree-wordmark{display:inline-grid;color:#f7f8fa;font:400 34px/.77 Anton,Impact,sans-serif;letter-spacing:-.035em;text-decoration:none;text-align:left;text-shadow:0 1px #8d969d,0 0 22px #fff2}
+.linktree-kicker{margin:21px 0 10px;color:#aeb7c0;font-size:10px;font-weight:700;letter-spacing:.32em}
+.linktree h1{margin:0;font:400 clamp(44px,9vw,74px)/.92 Anton,Impact,sans-serif;letter-spacing:-.025em;text-shadow:0 2px #70777d,0 0 24px #fff1}
+.linktree-description{margin:13px 0 26px;color:#aeb5bc;font-size:13px;letter-spacing:.015em}
+.linktree-links{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:15px}
+.linktree-link{grid-column:span 2;--tile:#263240;display:grid;justify-items:center;align-content:center;gap:10px;min-width:0;min-height:132px;padding:15px 8px 13px;border:1px solid #ffffff28;border-radius:18px;background:linear-gradient(145deg,#ffffff14,#ffffff06 52%,#ffffff0d);box-shadow:inset 0 1px #ffffff2e,0 12px 28px #0008;backdrop-filter:blur(18px) saturate(1.2);-webkit-backdrop-filter:blur(18px) saturate(1.2);color:#f5f6f7;text-decoration:none;transition:transform .2s ease,border-color .2s ease,background .2s ease,box-shadow .2s ease}
+.linktree-link:nth-child(4){grid-column:2/span 2}.linktree-link:nth-child(5){grid-column:4/span 2}
+.linktree-link:hover,.linktree-link:focus-visible{transform:translateY(-3px);border-color:#ffffff70;background:linear-gradient(145deg,#ffffff20,#ffffff0a 52%,#ffffff12);box-shadow:inset 0 1px #ffffff54,0 16px 36px #000a;outline:none}
+.linktree-icon{position:relative;isolation:isolate;display:grid;width:66px;height:66px;place-items:center;overflow:hidden;border:1px solid #ffffffb0;border-radius:18px;background:linear-gradient(145deg,#fff 0%,color-mix(in srgb,var(--tile),white 72%) 5%,color-mix(in srgb,var(--tile),white 34%) 13%,var(--tile) 48%,color-mix(in srgb,var(--tile),black 24%) 78%,color-mix(in srgb,var(--tile),white 40%) 100%);box-shadow:inset 0 2px 1px #ffffffdc,inset 1px 0 1px #ffffff7a,inset 0 -9px 13px #0008,0 1px 0 #fff8,0 6px 10px #000b,0 0 18px var(--glow);transform:perspective(100px) rotateX(3deg)}
+.linktree-icon:before{position:absolute;z-index:-1;top:-18%;left:-18%;width:140%;height:68%;border-radius:50%;content:"";background:radial-gradient(ellipse at 42% 70%,#fff9 0 8%,#ffffff78 24%,#ffffff19 49%,transparent 72%);filter:blur(1px);pointer-events:none}
+.linktree-icon:after{position:absolute;inset:0;border:1px solid #ffffff48;border-radius:inherit;content:"";background:linear-gradient(132deg,#ffffff54 0%,#ffffff1a 22%,transparent 38%,#ffffff12 55%,transparent 64%),linear-gradient(180deg,#fff2,transparent 44%,#0002);box-shadow:inset 0 0 0 2px #ffffff12;pointer-events:none}
+.linktree-icon svg{position:relative;width:40px;height:40px;fill:#ffffff12;stroke:#fff;stroke-width:2.45;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 1px 0 #243442) drop-shadow(0 0 5px var(--glow))}
+.linktree-icon svg .icon-detail{stroke-width:3.2}
+.linktree-link strong{max-width:100%;overflow:hidden;color:#eef1f4;font-size:12px;font-weight:700;text-overflow:ellipsis;white-space:nowrap}
+.chat-link{--tile:#0579d4;--glow:#29d8ff7d}.school-link{--tile:#00a98a;--glow:#56ffcd70}.events-link{--tile:#ff612f;--glow:#ffca4770}.account-link{--tile:#536b88;--glow:#9de7ff70}.tellonym-link{--tile:#ed176d;--glow:#ff76bf80}
+.linktree-footer{display:flex;justify-content:space-between;gap:12px;margin:25px 2px 0;color:#87919a;font-size:9px;letter-spacing:.23em}
 .linktree-footer span{color:#c5cbd0}
-@keyframes linktree-arrive{from{opacity:0;filter:blur(8px);transform:translateY(14px)}to{opacity:1;filter:none;transform:none}}
-@keyframes linktree-drift{to{transform:translate(-48%,-51%) rotate(5deg) scale(1.04)}}
-@media(max-width:420px){.linktree{padding:28px 18px}.linktree-wordmark{font-size:34px}.linktree-kicker{margin-top:25px}.linktree-link{min-height:72px}.linktree-footer{font-size:8px;letter-spacing:.16em}}
+@keyframes linktree-arrive{from{opacity:0;filter:blur(7px);transform:translateY(10px)}to{opacity:1;filter:none;transform:none}}
+@keyframes linktree-drift{to{transform:translate(-48%,-51%) rotate(3deg) scale(1.035)}}
+@media(max-width:620px){.linktree{padding:30px 18px}.linktree-content{width:min(100%,460px)}.linktree-links{gap:11px}.linktree-link{min-height:118px;border-radius:16px}.linktree-icon{width:57px;height:57px;border-radius:15px}.linktree-icon svg{width:36px;height:36px}}
+@media(max-width:360px){.linktree{padding:24px 13px}.linktree-links{gap:8px}.linktree-link{min-height:108px}.linktree-icon{width:52px;height:52px}.linktree-link strong{font-size:11px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+
+/* Match the bright silver Y2K surfaces used by the main Nitra Space pages. */
+html,body{background:#edf1f6;color:#171d27}
+.linktree{background-color:#e9eef5;background-image:radial-gradient(ellipse at 12% 4%,#fff 0,#ffffff00 33%),radial-gradient(ellipse at 89% 15%,#d8e9ff 0,#d8e9ff00 30%),linear-gradient(145deg,#f8faff 0%,#e3e8ef 45%,#f2f5fa 100%)}
+.linktree-atmosphere{display:none}
+.linktree-wordmark,.linktree h1{color:#1c2e4b;text-shadow:0 1px #fff,0 2px #aab6c6}
+.linktree-kicker,.linktree-description,.linktree-footer{color:#4c607d}
+.linktree-footer span{color:#263b5d}
+.linktree-link{border:2px outset #aeb9c7;border-radius:4px;background:linear-gradient(145deg,#fff,#edf2f8 46%,#cbd5e2);color:#1c2d47;box-shadow:inset 1px 1px #fff,inset -1px -1px #a3afbe,2px 4px 12px #5d6e8733;backdrop-filter:none;-webkit-backdrop-filter:none}
+.linktree-link:hover,.linktree-link:focus-visible{transform:translateY(-1px);border-color:#fff #8794a7 #8794a7 #fff;background:linear-gradient(#fff,#dce5f1);box-shadow:inset 1px 1px #fff,inset -1px -1px #a3afbe,2px 5px 14px #5d6e8733}
+.linktree-icon{border:2px outset #fff;border-radius:4px;background:linear-gradient(#fff,#d9e2ee 52%,#aebbd0);box-shadow:inset 1px 1px #fff,inset -1px -1px #99a6b7,1px 2px 4px #59677b44;transform:none}
+.linktree-icon:before{display:none}
+.linktree-icon:after{border-radius:1px;background:linear-gradient(145deg,#ffffff88,transparent 50%)}
+.linktree-icon svg{filter:saturate(.55) drop-shadow(0 1px #fff)}
+.linktree-link strong{color:#1f3454}
+

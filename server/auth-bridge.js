@@ -23,7 +23,7 @@ function validNewProfile(value) {
   const username = String(value?.username || '').trim().toLowerCase()
   const birthDate = String(value?.birth_date || '').trim()
   if (!name || name.length > 50) throw new Error('Doplň meno (najviac 50 znakov).')
-  if (!/^(?=.*[a-z_])[a-z0-9_]{4,24}$/.test(username)) throw new Error('Používateľské meno musí mať 4 až 24 znakov, aspoň jedno písmeno alebo podčiarkovník a môže obsahovať malé písmená, číslice a podčiarkovníky.')
+  if (!/^(?=.*[a-z])[a-z0-9_]{4,24}$/.test(username)) throw new Error('Používateľské meno musí mať 4 až 24 znakov, aspoň jedno písmeno a môže obsahovať malé písmená, číslice a podčiarkovníky.')
   if (!/^\d{4}-\d{2}-\d{2}$/.test(birthDate) || Number.isNaN(Date.parse(`${birthDate}T00:00:00Z`))) throw new Error('Zadaj platný dátum narodenia.')
   const cutoff = new Date()
   cutoff.setUTCFullYear(cutoff.getUTCFullYear() - 16)
@@ -75,6 +75,9 @@ export async function handleAuthBridge({ authorization, origin, profile, env = p
 
     const admin = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } })
     let user = await findSupabaseUser(admin, email)
+    if (user?.banned_until && Date.parse(user.banned_until) > Date.now()) {
+      return json(403, { code: 'account_banned', error: 'Tento e-mail patrí k zablokovanému účtu Nitra Space.' })
+    }
     if (!user) {
       let fields
       try { fields = validNewProfile(profile || clerkUser.unsafeMetadata?.nitra_profile) }
@@ -91,6 +94,18 @@ export async function handleAuthBridge({ authorization, origin, profile, env = p
       const updated = await admin.auth.admin.updateUserById(user.id, { email_confirm: true })
       if (updated.error) throw updated.error
       user = updated.data.user || user
+    }
+
+    const linkedClerkId = user.app_metadata?.clerk_user_id
+    if (linkedClerkId && linkedClerkId !== claims.sub) {
+      return json(409, { error: 'Tento Nitra Space účet je už prepojený s iným Clerk účtom.' })
+    }
+    if (linkedClerkId !== claims.sub || user.app_metadata?.auth_provider !== 'clerk') {
+      const linked = await admin.auth.admin.updateUserById(user.id, {
+        app_metadata: { ...user.app_metadata, auth_provider: 'clerk', clerk_user_id: claims.sub },
+      })
+      if (linked.error) throw linked.error
+      user = linked.data.user || user
     }
 
     const link = await admin.auth.admin.generateLink({ type: 'magiclink', email })

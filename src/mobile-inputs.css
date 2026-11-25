@@ -1,0 +1,16 @@
+/* iOS Safari zooms the page when a focused form control uses text smaller than 16px. */
+@media (max-width: 760px) {
+  html,
+  body {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  input,
+  textarea,
+  select,
+  [contenteditable="true"] {
+    font-size: max(16px, 1rem) !important;
+    touch-action: manipulation;
+  }
+}

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="sk">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <meta name="theme-color" content="#08090e">
+    <meta name="description" content="RANDOM — anonymné spoznávanie ľudí z Nitry bez fotografií a verejných profilov.">
+    <link rel="icon" type="image/png" href="/icons/nitra-space-192.png">
+    <title>RANDOM — Nitra Space</title>
+  </head>
+  <body class="random-body">
+    <div class="random-app" id="random-app">
+      <header class="random-header">
+        <a class="random-brand" href="/chat" aria-label="Nitra Space, späť na chat"><img src="/nitra-space-logo-optimized.webp" alt="Nitra Space"></a>
+        <nav class="random-top-nav" aria-label="Hlavná navigácia">
+          <a href="/chat">Chaty</a><a href="/space#rooms">Roomky</a><a href="/space#events">Eventy</a><a href="/account">Účet</a>
+        </nav>
+        <span class="random-edition">NITRA / 2026</span>
+      </header>
+      <main id="random-main" class="random-main" aria-live="polite">
+        <div class="random-loading"><span class="random-spinner" aria-hidden="true"></span><p>Pripájam RANDOM…</p></div>
+      </main>
+      <nav class="random-mobile-nav" aria-label="Navigácia">
+        <a class="active" href="/random"><span aria-hidden="true">✳</span>RANDOM</a>
+        <a href="/chat"><span aria-hidden="true">◌</span>Chaty</a>
+        <a href="/space#events"><span aria-hidden="true">◇</span>Eventy</a>
+        <a href="/account"><span aria-hidden="true">○</span>Účet</a>
+      </nav>
+    </div>
+    <script type="module" src="/src/features/random.js"></script>
+  </body>
+</html>
