@@ -33,6 +33,7 @@
     {"source":"/links","destination":"/links.html"},
     {"source":"/events/:eventId/room","destination":"/space.html"},
     {"source":"/news/:path*","destination":"/space.html"},
+    {"source":"/unreleased-tells","destination":"/space.html"},
     {"source":"/polls","destination":"/space.html"},
     {"source":"/people/:path*","destination":"/space.html"},
     {"source":"/messages/:path*","destination":"/space.html"},

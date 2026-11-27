@@ -74,6 +74,7 @@ export async function mount(client,path,go){
     else if(path.startsWith('/news')){const m=await import('./editorial-news.js');if(generation===state.generation)await m.renderNews(path)}
     else if(path==='/people'){const m=await import('./matching-deck.js');if(generation===state.generation)await m.renderMatching()}
     else if(path==='/polls'){const m=await import('./polls.js');if(generation===state.generation)await m.renderPolls()}
+    else if(['/unreleased-tells','/unreleased-tells/'].includes(path)){const m=await import('./unreleased-tells.js');if(generation===state.generation)await m.renderTells()}
     else if(path==='/activity'){const m=await import('./activity.js');if(generation===state.generation)await m.renderActivity()}
     else {const m=await import('./social.js');if(generation===state.generation)await m.renderSocial(path)}
   }catch(error){if(generation===state.generation)content(`<section class="panel"><h2>Obsah sa nepodarilo načítať.</h2><p>${html(error.message)}</p><button data-feature-retry>Skúsiť znova</button></section>`);document.querySelector('[data-feature-retry]')?.addEventListener('click',()=>mount(client,path,go))}
