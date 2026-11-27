@@ -52,7 +52,7 @@ export async function renderTells() {
   if (!member()) { navigate(login); return }
   const userId = state.user.id
   content(`<section class="tells-feed"><h1>Unreleased <em>Tells</em></h1>
-    ${state.admin ? form('publish') : ''}<div data-posts></div>
+    <div data-posts></div>
     <p data-status role="status">Načítavam telly…</p><button data-more hidden>Staršie telly</button></section>`)
   const root = document.querySelector('.tells-feed')
   const posts = root.querySelector('[data-posts]')

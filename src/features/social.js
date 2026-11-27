@@ -90,7 +90,7 @@ async function matchingImage(file){
 async function account(){
   if(state.needsProfile){document.querySelector('#chrome-app')?.classList.add('account-auth-open');return clerkProfileForm()}
   const returnTo=new URLSearchParams(location.search).get('return_to')
-  if(state.user&&['/random','/unreleased-tells'].includes(returnTo)){window.location.replace(returnTo);return}
+  if(state.user&&['/random','/unreleased-tells','/social.html?admin=1'].includes(returnTo)){window.location.replace(returnTo);return}
   if(!state.user&&state.clerkUser){
     authWindow('NITRA SPACE / ÚČET',`<div class="auth-heading"><h2>Už máš otvorenú reláciu.</h2><p>Clerk má aktívnu reláciu pre <strong>${html(state.clerkUser.primaryEmailAddress?.emailAddress||'existujúci účet')}</strong>.</p></div><p class="auth-message error" role="alert">${state.clerkError?html(authError(state.clerkError)):''}</p><button class="auth-submit" type="button" data-switch-account>Použiť iný e-mail</button>`)
     document.querySelector('[data-switch-account]').onclick=event=>{
@@ -168,7 +168,7 @@ async function finishClerkLogin(profile=null){
  state.needsProfile=linked.profileRequired;state.clerkUser=linked.clerkUser||state.clerkUser;state.clerkError=null;state.user=linked.user;state.admin=false
  window.dispatchEvent(new Event('nitra-auth-change'))
  if(linked.profileRequired){await account();return}
- if(['/random','/unreleased-tells'].includes(returnTo)){window.location.assign(returnTo);return}
+ if(['/random','/unreleased-tells','/social.html?admin=1'].includes(returnTo)){window.location.assign(returnTo);return}
  history.replaceState(null,'',location.pathname)
  notice('Prihlásenie úspešné.')
  await account()

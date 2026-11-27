@@ -941,6 +941,7 @@ function bind() {
   })
 
   document.querySelector('[data-admin-toggle]')?.addEventListener('click', () => {
+    if(!adminEntryRequested){location.assign('/social.html?admin=1#events');return}
     if (state.adminOpen || state.adminGateOpen) {
       state.adminOpen = false
       state.adminGateOpen = false
@@ -982,6 +983,7 @@ function bind() {
   })
 
   document.querySelector('[data-admin-lock]')?.addEventListener('click', () => {
+    if(adminEntryRequested){fetch('/api/admin-session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lock:true})}).then(()=>location.reload());return}
     state.adminAuthenticated = false
     state.adminPassword = ''
     state.adminOpen = false
@@ -1141,3 +1143,16 @@ document.addEventListener('visibilitychange', () => {
     loadWallPosts()
   }
 })
+
+export async function showAdminEvents(stats){
+ const {data,error}=await supabase.rpc('is_admin')
+ if(error||!data)throw Error('Vyžaduje sa admin účet.')
+ state.adminAuthenticated=true
+ state.adminGateOpen=false
+ state.adminOpen=!stats
+ state.activeSection='events'
+ state.analyticsOpen=stats
+ if(stats)await loadAdminAnalytics()
+ render(true)
+ if(stats)document.querySelector('.analytics-panel')?.scrollIntoView()
+}

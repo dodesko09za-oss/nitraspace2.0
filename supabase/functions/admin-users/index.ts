@@ -1,6 +1,8 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.57.0'
 
 const allowedOrigins = new Set([
+  'https://nitraspace.sk',
+  'https://www.nitraspace.sk',
   'https://nitraspace.xyz',
   'https://www.nitraspace.xyz',
   'https://nitra-space-social-preview.vercel.app',
@@ -11,7 +13,7 @@ function corsHeaders(request: Request) {
   const origin = request.headers.get('origin') || ''
   return {
     'Access-Control-Allow-Origin': allowedOrigins.has(origin) ? origin : 'https://nitraspace.xyz',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-api-version',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Vary': 'Origin',
   }
