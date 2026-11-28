@@ -45,6 +45,15 @@ async function start(){
          <details class="admin-moderation">
            <summary>Moderovať komentáre a lajky</summary>
            <button type="button" class="admin-danger" data-delete-all-tells disabled>Vymazať všetky príspevky</button>
+           <dialog class="admin-delete-dialog" aria-labelledby="tell-delete-title">
+             <form>
+               <h2 id="tell-delete-title"></h2>
+               <p>Spolu s príspevkami sa odstránia aj ich komentáre a lajky.</p>
+               <label>Na potvrdenie napíš VYMAZAŤ<input name="confirmation" autocomplete="off"></label>
+               <div><button type="button" data-cancel-delete>Zrušiť</button>
+               <button type="submit" class="admin-danger">Potvrdiť vymazanie</button></div>
+             </form>
+           </dialog>
            <p role="status"></p><div data-moderation-posts></div>
            <button type="button" data-more-tells hidden>Staršie príspevky</button>
          </details>
@@ -91,9 +100,6 @@ async function start(){
  let deleting=false
  async function deletePosts(post){
    if(deleting)return
-   const message=post?'Vymazať tento príspevok aj s komentármi a lajkami?':'Natrvalo vymazať VŠETKY príspevky Tells vrátane komentárov a lajkov?'
-   if(!confirm(message))return
-   if(!post&&prompt('Na potvrdenie napíš VYMAZAŤ')!=='VYMAZAŤ')return
    deleting=true
    deleteAll.disabled=true
    moderation.setAttribute('aria-busy','true')
@@ -119,7 +125,29 @@ async function start(){
      moderation.removeAttribute('aria-busy')
    }
  }
- deleteAll.onclick=()=>deletePosts()
+ const deleteDialog=moderation.querySelector('.admin-delete-dialog')
+ const deleteForm=deleteDialog.querySelector('form')
+ const confirmation=deleteForm.elements.confirmation
+ const confirmDelete=deleteForm.querySelector('[type=submit]')
+ let selectedPost
+ function askToDelete(post){
+   if(deleting||deleteDialog.open)return
+   selectedPost=post
+   deleteForm.reset()
+   deleteDialog.querySelector('h2').textContent=post?'Vymazať príspevok?':'Vymazať všetky Tells?'
+   confirmation.closest('label').hidden=Boolean(post)
+   confirmDelete.disabled=!post
+   deleteDialog.showModal()
+ }
+ confirmation.oninput=()=>{confirmDelete.disabled=confirmation.value.trim().toLocaleUpperCase('sk-SK')!=='VYMAZAŤ'}
+ deleteForm.querySelector('[data-cancel-delete]').onclick=()=>deleteDialog.close()
+ deleteForm.onsubmit=event=>{
+   event.preventDefault()
+   if(confirmDelete.disabled)return
+   deleteDialog.close()
+   void deletePosts(selectedPost)
+ }
+ deleteAll.onclick=()=>askToDelete()
  const checked=async query=>{const result=await query;if(result.error)throw result.error;return result.data}
  let postOffset=0
  function node(tag,text){const element=document.createElement(tag);element.textContent=text;return element}
@@ -166,7 +194,7 @@ async function start(){
        const removePost=node('button','Vymazať príspevok')
        removePost.type='button'
        removePost.className='admin-danger'
-       removePost.onclick=()=>deletePosts(post)
+       removePost.onclick=()=>askToDelete(post)
        details.append(summary,removePost,list,more)
        let loaded=false
        details.ontoggle=async()=>{
