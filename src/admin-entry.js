@@ -42,6 +42,11 @@ async function start(){
            <label class="admin-upload">Vybrať fotky<input type="file" name="photos" multiple accept="image/jpeg,image/png,image/webp" required></label>
            <ol></ol><button class="admin-primary">Zverejniť jednotlivo</button>
          </form>
+         <details class="admin-moderation">
+           <summary>Moderovať komentáre a lajky</summary>
+           <p role="status"></p><div data-moderation-posts></div>
+           <button type="button" data-more-tells hidden>Staršie príspevky</button>
+         </details>
        </section>
        <section data-panel="users"><form id="search"><input name="q" aria-label="Hľadať účet" placeholder="Meno alebo e-mail"><button class="admin-primary">Hľadať</button></form><ul></ul></section>
        <section data-panel="activity"><ul></ul></section>
@@ -76,6 +81,76 @@ async function start(){
  picker.value=''
  }catch(err){msg.textContent='Dávka zastavená. '+err.message+' Zostáva: '+pending.length}
  finally{button.disabled=picker.disabled=false}}
+ const moderation=shell.querySelector('.admin-moderation')
+ const postList=moderation.querySelector('[data-moderation-posts]')
+ const moreTells=moderation.querySelector('[data-more-tells]')
+ const moderationStatus=moderation.querySelector('[role=status]')
+ const moderationPage=20
+ const checked=async query=>{const result=await query;if(result.error)throw result.error;return result.data}
+ let postOffset=0
+ function node(tag,text){const element=document.createElement(tag);element.textContent=text;return element}
+ async function moreComments(post,list,button) {
+   button.disabled=true
+   try {
+     const offset=list.childElementCount
+     const comments=await checked(db.from('tell_comments')
+       .select('id,username,body,tell_comment_likes(count)').eq('tell_id',post.id)
+       .order('created_at',{ascending:false}).order('id').range(offset,offset+moderationPage))
+     for(const comment of comments.slice(0,moderationPage)){
+       const item=node('li','')
+       const remove=node('button','Vymazať')
+       item.append(node('strong','@'+comment.username),node('p',comment.body),node('small','♥ '+comment.tell_comment_likes[0].count),remove)
+       remove.onclick=async()=>{
+         if(!confirm('Vymazať tento komentár?'))return
+         remove.disabled=true
+         try{
+           await checked(db.from('tell_comments').delete().eq('id',comment.id).select('id').single())
+           item.remove()
+           if(!button.hidden)await moreComments(post,list,button)
+         }catch(error){moderationStatus.textContent=error.message}
+         finally{remove.disabled=false}
+       }
+       list.append(item)
+     }
+     button.hidden=comments.length<=moderationPage
+   }catch(error){moderationStatus.textContent=error.message}
+   finally{button.disabled=false}
+ }
+ async function listModerationPosts(){
+   moreTells.disabled=true
+   moderationStatus.textContent=''
+   try{
+     const posts=await checked(db.from('unreleased_tells').select('id,body,photo_path,created_at,tell_likes(count),tell_comments(count)')
+       .order('created_at',{ascending:false}).order('id').range(postOffset,postOffset+moderationPage))
+     for(const post of posts.slice(0,moderationPage)){
+       const details=node('details','')
+       const title=post.body||new Date(post.created_at).toLocaleString('sk-SK')
+       const summary=node('summary',title+' · ♥ '+post.tell_likes[0].count+' · Komentáre '+post.tell_comments[0].count)
+       const list=node('ul','')
+       const more=node('button','Načítať komentáre')
+       more.type='button'
+       details.append(summary,list,more)
+       let loaded=false
+       details.ontoggle=async()=>{
+         if(!details.open||loaded)return
+         loaded=true
+         const photo=await db.storage.from('unreleased-tells').createSignedUrl(post.photo_path,3600)
+         if(photo.data?.signedUrl){
+           const image=node('img','');image.src=photo.data.signedUrl;image.alt=post.body||'Fotka z Tellu';details.insertBefore(image,list)
+         }
+         await moreComments(post,list,more)
+       }
+       more.onclick=()=>moreComments(post,list,more)
+       postList.append(details)
+     }
+     postOffset+=Math.min(posts.length,moderationPage)
+     moreTells.hidden=posts.length<=moderationPage
+     if(!postOffset)moderationStatus.textContent='Zatiaľ tu nie sú žiadne príspevky.'
+   }catch(error){moderationStatus.textContent=error.message;moreTells.hidden=false}
+   finally{moreTells.disabled=false}
+ }
+ moderation.ontoggle=()=>{if(moderation.open&&!postOffset&&!moreTells.disabled)void listModerationPosts()}
+ moreTells.onclick=listModerationPosts
  const legacy=await import('./social.js')
  async function users(section,q=''){
  const {data,error}=await db.rpc('admin_list_users',{p_query:q,p_limit:200});if(error)throw error

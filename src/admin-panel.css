@@ -78,3 +78,8 @@
   .admin-menu { display: flex; overflow: auto; }
   .admin-heading { padding: 12px 14px; }
 }
+
+.admin-moderation { margin-block-start: 22px; }
+.admin-moderation details { margin-block: 8px; padding: 12px; border: 1px solid #2a303c; border-radius: 8px; }
+.admin-moderation img { display: block; width: 110px; border-radius: 8px; margin-top: 12px; }
+.admin-moderation li p { margin: 4px 0; }

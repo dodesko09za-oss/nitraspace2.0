@@ -139,11 +139,21 @@ export async function renderTells() {
   async function loadComments(article) {
     const list = article.querySelector('ul')
     const offset = list.childElementCount
-    const rows = await checked(db.from('tell_comments').select('username,body').eq('tell_id', article.dataset.id)
+    const rows = await checked(db.from('tell_comments').select('id,user_id,username,body,tell_comment_likes(count)').eq('tell_id', article.dataset.id)
       .order('created_at').order('id').range(offset, offset + pageSize))
-    list.insertAdjacentHTML('beforeend', rows.slice(0,pageSize).map(row =>
-      `<li><strong>@${html(row.username)}</strong> ${html(row.body)}</li>`).join(''))
+    const page = rows.slice(0,pageSize)
+    const likes = page.length ? await checked(db.from('tell_comment_likes').select('comment_id')
+      .eq('user_id',userId).in('comment_id',page.map(row => row.id))) : []
+    const liked = new Set(likes.map(row => row.comment_id))
+    list.insertAdjacentHTML('beforeend',page.map(row =>
+      `<li data-comment="${html(row.id)}"><strong>@${html(row.username)}</strong> ${html(row.body)}
+      <button type="button" data-comment-like aria-label="Páči sa mi komentár" aria-pressed="${liked.has(row.id)}">${heart}<span>${row.tell_comment_likes[0].count}</span></button>
+      ${row.user_id===userId ? '<button type="button" data-comment-delete>Vymazať</button>' : ''}</li>`).join(''))
     article.querySelector('[data-more-comments]').hidden = rows.length <= pageSize
+  }
+  async function refreshCommentCount(article) {
+    const result = await db.from('tell_comments').select('id',{count:'exact',head:true}).eq('tell_id',article.dataset.id)
+    if (!result.error) article.querySelector('[data-comments] span').textContent = result.count
   }
   more.onclick = loadPosts
   root.addEventListener('click', async event => {
@@ -164,6 +174,23 @@ export async function renderTells() {
         const count = await db.from('tell_likes').select('tell_id',{count:'exact',head:true}).eq('tell_id',article.dataset.id)
         if (count.error) throw count.error
         btn.querySelector('span').textContent = count.count
+      } else if (btn.hasAttribute('data-comment-like')) {
+        const id = btn.closest('[data-comment]').dataset.comment
+        const liked = btn.getAttribute('aria-pressed') === 'true'
+        const table = db.from('tell_comment_likes')
+        const mutation = liked ? table.delete().eq('comment_id',id).eq('user_id',userId) : table.insert({comment_id:id})
+        const {error} = await mutation
+        if (error && error.code !== '23505') throw error
+        btn.setAttribute('aria-pressed',String(!liked))
+        const count = await db.from('tell_comment_likes').select('comment_id',{count:'exact',head:true}).eq('comment_id',id)
+        if (count.error) throw count.error
+        btn.querySelector('span').textContent = count.count
+      } else if (btn.hasAttribute('data-comment-delete')) {
+        if (!confirm('Vymazať tvoj komentár?')) return
+        const item = btn.closest('[data-comment]')
+        await checked(db.from('tell_comments').delete().eq('id',item.dataset.comment).eq('user_id',userId).select('id').single())
+        article.querySelector('.tell-thread ul').replaceChildren()
+        await Promise.all([loadComments(article),refreshCommentCount(article)])
       } else if (btn.hasAttribute('data-comments')) {
         const thread = article.querySelector('.tell-thread')
         if (thread.hidden) {
@@ -193,8 +220,7 @@ export async function renderTells() {
         const list = article.querySelector('ul')
         list.replaceChildren()
         await loadComments(article)
-        const count = await db.from('tell_comments').select('id',{count:'exact',head:true}).eq('tell_id',article.dataset.id)
-        if (!count.error) article.querySelector('[data-comments] span').textContent = count.count
+        await refreshCommentCount(article)
       } else {
         const photo = await renderCrop(editor.querySelector('[data-preview]'),Number(editor.elements.crop.value)/100)
         const path = crypto.randomUUID()+'.jpg'

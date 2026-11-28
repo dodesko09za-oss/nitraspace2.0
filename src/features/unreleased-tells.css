@@ -45,3 +45,8 @@
 .tells-feed [hidden] { display: none; }
 .tells-feed :focus-visible { outline: 2px solid #ffe3a2; outline-offset: 2px; }
 .tells-feed button:disabled { opacity: .55; }
+
+.tell-thread [data-comment-like] { display: inline-flex; align-items: center; gap: 5px; margin-inline: 6px; }
+.tell-thread [data-comment-like] svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+.tell-thread [data-comment-like][aria-pressed="true"] { color: #ff527b; }
+.tell-thread [data-comment-like][aria-pressed="true"] svg { fill: currentColor; }
