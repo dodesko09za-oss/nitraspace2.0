@@ -49,7 +49,18 @@ function card(post, liked) {
 }
 
 export async function renderTells() {
-  if (!member()) { navigate(login); return }
+  if (!member()) {
+    content(`<section class="tell-exclusive" aria-labelledby="tell-exclusive-title">
+      <span>Unreleased Tells</span>
+      <h1 id="tell-exclusive-title">EXCLUSIVE</h1>
+      <p>Príspevky sú dostupné iba pre prihlásených.</p>
+      <div class="tell-exclusive-actions">
+        <a href="${login}">Prihlásiť sa</a>
+        <a href="${login}#signup">Registrovať sa</a>
+      </div>
+    </section>`)
+    return
+  }
   const userId = state.user.id
   content(`<section class="tells-feed"><h1>Unreleased <em>Tells</em></h1>
     <div data-posts></div>

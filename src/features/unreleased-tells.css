@@ -50,3 +50,21 @@
 .tell-thread [data-comment-like] svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; }
 .tell-thread [data-comment-like][aria-pressed="true"] { color: #ff527b; }
 .tell-thread [data-comment-like][aria-pressed="true"] svg { fill: currentColor; }
+
+.tell-exclusive {
+  max-width: 740px;
+  margin: clamp(16px, 5vw, 65px) auto;
+  padding: clamp(22px, 7vw, 72px) 16px;
+  border: 1px solid #30343b;
+  border-radius: 22px;
+  background: radial-gradient(ellipse at top, #222333, #111217 67%);
+  color: #fbfaff;
+  text-align: center;
+}
+.tell-exclusive > span { color: #c6bee9; font: 650 14px system-ui, sans-serif; }
+.tell-exclusive h1 { margin: 8px 0; font: 900 clamp(32px, 10vw, 104px)/1 system-ui, sans-serif; letter-spacing: -.065em; }
+.tell-exclusive p { margin: 12px 0 26px; color: #d6d4df; }
+.tell-exclusive-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.tell-exclusive-actions a { min-height: 44px; display: inline-grid; place-items: center; padding: 0 16px; border: 1px solid #676378; border-radius: 12px; color: inherit; font: 650 15px system-ui, sans-serif; text-decoration: none; }
+.tell-exclusive-actions a:first-child { background: #eeebff; color: #161220; border-color: #eeebff; }
+.tell-exclusive-actions a:focus-visible { outline: 2px solid white; outline-offset: 3px; }
