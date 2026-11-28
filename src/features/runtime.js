@@ -77,5 +77,22 @@ export async function mount(client,path,go){
     else if(['/unreleased-tells','/unreleased-tells/'].includes(path)){const m=await import('./unreleased-tells.js');if(generation===state.generation)await m.renderTells()}
     else if(path==='/activity'){const m=await import('./activity.js');if(generation===state.generation)await m.renderActivity()}
     else {const m=await import('./social.js');if(generation===state.generation)await m.renderSocial(path)}
-  }catch(error){if(generation===state.generation)content(`<section class="panel"><h2>Obsah sa nepodarilo načítať.</h2><p>${html(error.message)}</p><button data-feature-retry>Skúsiť znova</button></section>`);document.querySelector('[data-feature-retry]')?.addEventListener('click',()=>mount(client,path,go))}
+    sessionStorage.removeItem('nitra-feature-reload:'+path)
+  }catch(error){
+    if(generation!==state.generation)return
+    const moduleError=/failed to fetch dynamically imported module|error loading dynamically imported module|importing a module script failed|unable to preload css/i.test(error?.message||'')
+    if(moduleError){
+      const key='nitra-feature-reload:'+path
+      if(!sessionStorage.getItem(key)){
+        sessionStorage.setItem(key,'1')
+        location.reload()
+        return
+      }
+      content('<section class="panel"><h2>Stránku sa nepodarilo načítať.</h2><button data-feature-retry>Obnoviť stránku</button></section>')
+      document.querySelector('[data-feature-retry]')?.addEventListener('click',()=>location.reload())
+      return
+    }
+    content(`<section class="panel"><h2>Obsah sa nepodarilo načítať.</h2><p>${html(error.message)}</p><button data-feature-retry>Skúsiť znova</button></section>`)
+    document.querySelector('[data-feature-retry]')?.addEventListener('click',()=>mount(client,path,go))
+  }
 }
