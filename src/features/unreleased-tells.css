@@ -85,3 +85,11 @@
 .tells-feed form[data-kind="comment"] { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: end; }
 .tells-feed form[data-kind="comment"] textarea { min-height: 44px; resize: vertical; border-radius: 16px; }
 .tells-feed form[data-kind="comment"] button { min-height: 44px; padding-inline: 8px; border: 0; background: none; color: #aebdff; }
+
+.tell-replies { grid-column: 2 / -1; min-width: 0; border-inline-start: 1px solid #33343c; padding-inline-start: 10px; }
+.tell-thread button[data-reply], .tell-thread button[data-show-replies], .tell-thread button[data-more-replies] {
+  padding: 3px 0; border: 0; background: none; color: #bfbcc7; font-size: 12px; font-weight: 600;
+}
+.tell-thread button[data-reply] { margin-inline-end: 12px; }
+.tell-replies [data-reply-empty] { color: #bfbcc7; font-size: 12px; margin: 6px 0; }
+.tell-replies [hidden] { display: none !important; }

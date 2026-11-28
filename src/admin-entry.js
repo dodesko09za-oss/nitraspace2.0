@@ -158,12 +158,12 @@ async function start(){
    try {
      const offset=list.childElementCount
      const comments=await checked(db.from('tell_comments')
-       .select('id,username,body,tell_comment_likes(count)').eq('tell_id',post.id)
+       .select('id,username,body,reply_to,tell_comment_likes(count)').eq('tell_id',post.id)
        .order('created_at',{ascending:false}).order('id').range(offset,offset+moderationPage))
      for(const comment of comments.slice(0,moderationPage)){
        const item=node('li','')
        const remove=node('button','Vymazať')
-       item.append(node('strong','@'+comment.username),node('p',comment.body),node('small','♥ '+comment.tell_comment_likes[0].count),remove)
+       item.append(node('strong',(comment.reply_to?'Odpoveď · ':'')+'@'+comment.username),node('p',comment.body),node('small','♥ '+comment.tell_comment_likes[0].count),remove)
        remove.onclick=async()=>{
          if(!confirm('Vymazať tento komentár?'))return
          remove.disabled=true

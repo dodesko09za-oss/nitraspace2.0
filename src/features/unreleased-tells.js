@@ -147,19 +147,23 @@ export async function renderTells() {
       more.hidden = false
     } finally { more.disabled = false }
   }
-  async function loadComments(article) {
-    const list = article.querySelector('ul')
+  async function loadComments(article, parent = null) {
+    const list = parent ? parent.querySelector('[data-reply-list]') : article.querySelector('.tell-thread > ul')
     const offset = list.childElementCount
-    const rows = await checked(db.from('tell_comments').select('id,user_id,username,body,tell_comment_likes(count)').eq('tell_id', article.dataset.id)
+    const query = db.from('tell_comments').select('id,user_id,username,body,tell_comment_likes(count)').eq('tell_id',article.dataset.id)
+    const rows = await checked((parent ? query.eq('reply_to',parent.dataset.comment) : query.is('reply_to',null))
       .order('created_at').order('id').range(offset, offset + pageSize))
     const page = rows.slice(0,pageSize)
     const likes = page.length ? await checked(db.from('tell_comment_likes').select('comment_id')
       .eq('user_id',userId).in('comment_id',page.map(row => row.id))) : []
     const liked = new Set(likes.map(row => row.comment_id))
     list.insertAdjacentHTML('beforeend',page.map(row =>
-      `<li data-comment="${html(row.id)}"><span class="tell-comment-avatar" aria-hidden="true">${html(row.username?.[0]?.toUpperCase()||"•")}</span><div class="tell-comment-copy"><strong>@${html(row.username)}</strong><p>${html(row.body)}</p>${row.user_id===userId ? '<button type="button" data-comment-delete>Vymazať</button>' : ''}</div>
-      <button type="button" data-comment-like aria-label="Páči sa mi komentár" aria-pressed="${liked.has(row.id)}">${heart}<span>${row.tell_comment_likes[0].count}</span></button></li>`).join(''))
-    article.querySelector('[data-more-comments]').hidden = rows.length <= pageSize
+      `<li data-comment="${html(row.id)}"><span class="tell-comment-avatar" aria-hidden="true">${html(row.username?.[0]?.toUpperCase()||"•")}</span><div class="tell-comment-copy"><strong>@${html(row.username)}</strong><p>${html(row.body)}</p>${row.user_id===userId ? '<button type="button" data-comment-delete>Vymazať</button>' : ''}${parent?'':'<button type="button" data-reply>Odpovedať</button>'}</div>
+      <button type="button" data-comment-like aria-label="Páči sa mi komentár" aria-pressed="${liked.has(row.id)}">${heart}<span>${row.tell_comment_likes[0].count}</span></button>${parent?'':`<div class="tell-replies"><button type="button" data-show-replies aria-expanded="false">Zobraziť odpovede</button><div data-reply-thread hidden><ul data-reply-list></ul><p data-reply-empty hidden>Zatiaľ bez odpovedí</p><button type="button" data-more-replies hidden>Ďalšie odpovede</button></div></div>`}</li>`).join(''))
+    if(parent){
+      parent.querySelector('[data-more-replies]').hidden=rows.length<=pageSize
+      parent.querySelector('[data-reply-empty]').hidden=Boolean(list.childElementCount)
+    }else article.querySelector('[data-more-comments]').hidden=rows.length<=pageSize
   }
   async function refreshCommentCount(article) {
     const result = await db.from('tell_comments').select('id',{count:'exact',head:true}).eq('tell_id',article.dataset.id)
@@ -195,6 +199,35 @@ export async function renderTells() {
         const count = await db.from('tell_comment_likes').select('comment_id',{count:'exact',head:true}).eq('comment_id',id)
         if (count.error) throw count.error
         btn.querySelector('span').textContent = count.count
+      } else if (btn.hasAttribute('data-show-replies') || btn.hasAttribute('data-reply') || btn.hasAttribute('data-more-replies')) {
+        const parent = btn.closest('[data-comment]')
+        const thread = parent.querySelector('[data-reply-thread]')
+        const toggle = parent.querySelector('[data-show-replies]')
+        if (btn.hasAttribute('data-more-replies')) {
+          await loadComments(article,parent)
+        } else if (!thread.hidden && btn===toggle) {
+          thread.hidden=true
+          toggle.setAttribute('aria-expanded','false')
+          toggle.textContent='Zobraziť odpovede'
+        } else {
+          if(thread.hidden){
+            parent.querySelector('[data-reply-list]').replaceChildren()
+            await loadComments(article,parent)
+            thread.hidden=false
+            toggle.setAttribute('aria-expanded','true')
+            toggle.textContent='Skryť odpovede'
+          }
+          if(btn.hasAttribute('data-reply')){
+            if(!thread.querySelector('form')){
+              thread.insertAdjacentHTML('beforeend',form('comment'))
+              const replyForm=thread.querySelector('form')
+              replyForm.dataset.replyTo=parent.dataset.comment
+              replyForm.elements.body.placeholder='Napíš odpoveď…'
+              replyForm.elements.body.setAttribute('aria-label','Tvoja odpoveď')
+            }
+            thread.querySelector('textarea').focus()
+          }
+        }
       } else if (btn.hasAttribute('data-comment-delete')) {
         if (!confirm('Vymazať tvoj komentár?')) return
         const item = btn.closest('[data-comment]')
@@ -225,11 +258,13 @@ export async function renderTells() {
     try {
       const article = editor.closest('article')
       if (article) {
-        await checked(db.from('tell_comments').insert({tell_id:article.dataset.id,body}))
+        const replyTo=editor.dataset.replyTo
+        await checked(db.from('tell_comments').insert({tell_id:article.dataset.id,body,...(replyTo?{reply_to:replyTo}:{})}))
         editor.reset()
-        const list = article.querySelector('ul')
+        const parent=replyTo?editor.closest('[data-comment]'):null
+        const list=parent?parent.querySelector('[data-reply-list]'):article.querySelector('.tell-thread > ul')
         list.replaceChildren()
-        await loadComments(article)
+        await loadComments(article,parent)
         await refreshCommentCount(article)
       } else {
         const photo = await renderCrop(editor.querySelector('[data-preview]'),Number(editor.elements.crop.value)/100)
