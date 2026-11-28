@@ -40,7 +40,7 @@ async function renderCrop(image, position) {
 
 function card(post, liked) {
   return `<article class="tell" data-id="${html(post.id)}">
-    <div class="tell-byline"><span class="tell-avatar" aria-hidden="true">“</span><strong>Nitra Space</strong><time datetime="${html(post.created_at)}">${date.format(new Date(post.created_at))}</time></div>
+    <div class="tell-byline"><img class="tell-avatar" src="/nitra-space-logo-optimized.webp" alt="" width="40" height="40"><strong>Nitra Space</strong><time datetime="${html(post.created_at)}">${date.format(new Date(post.created_at))}</time></div>
     <div class="tell-frame" data-photo="${html(post.photo_path)}"><img alt="${html(post.body || 'Fotka z Unreleased Tells')}" hidden><button type="button" data-retry-photo hidden>Načítať fotku znova</button></div>
     ${post.body ? `<p class="tell-text">${html(post.body)}</p>` : ''}
     <div class="tell-actions"><button data-like aria-pressed="${liked}" aria-label="Páči sa mi">${heart}<span>${post.tell_likes[0].count}</span></button>
@@ -157,9 +157,8 @@ export async function renderTells() {
       .eq('user_id',userId).in('comment_id',page.map(row => row.id))) : []
     const liked = new Set(likes.map(row => row.comment_id))
     list.insertAdjacentHTML('beforeend',page.map(row =>
-      `<li data-comment="${html(row.id)}"><strong>@${html(row.username)}</strong> ${html(row.body)}
-      <button type="button" data-comment-like aria-label="Páči sa mi komentár" aria-pressed="${liked.has(row.id)}">${heart}<span>${row.tell_comment_likes[0].count}</span></button>
-      ${row.user_id===userId ? '<button type="button" data-comment-delete>Vymazať</button>' : ''}</li>`).join(''))
+      `<li data-comment="${html(row.id)}"><span class="tell-comment-avatar" aria-hidden="true">${html(row.username?.[0]?.toUpperCase()||"•")}</span><div class="tell-comment-copy"><strong>@${html(row.username)}</strong><p>${html(row.body)}</p>${row.user_id===userId ? '<button type="button" data-comment-delete>Vymazať</button>' : ''}</div>
+      <button type="button" data-comment-like aria-label="Páči sa mi komentár" aria-pressed="${liked.has(row.id)}">${heart}<span>${row.tell_comment_likes[0].count}</span></button></li>`).join(''))
     article.querySelector('[data-more-comments]').hidden = rows.length <= pageSize
   }
   async function refreshCommentCount(article) {

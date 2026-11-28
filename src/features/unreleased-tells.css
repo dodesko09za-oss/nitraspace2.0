@@ -68,3 +68,20 @@
 .tell-exclusive-actions a { min-height: 44px; display: inline-grid; place-items: center; padding: 0 16px; border: 1px solid #676378; border-radius: 12px; color: inherit; font: 650 15px system-ui, sans-serif; text-decoration: none; }
 .tell-exclusive-actions a:first-child { background: #eeebff; color: #161220; border-color: #eeebff; }
 .tell-exclusive-actions a:focus-visible { outline: 2px solid white; outline-offset: 3px; }
+
+.tell-avatar { display: block; width: 40px; height: 40px; padding: 4px; object-fit: contain; background: #171b24; border: 1px solid #3c4350; }
+.tell-actions { gap: 16px; padding: 5px 16px; border-top: 0; }
+.tell-actions button { padding: 0 5px; gap: 8px; font-weight: 600; }
+.tell-actions svg { width: 24px; height: 24px; stroke-width: 1.8; }
+.tell-actions [aria-pressed="true"], .tell-thread [data-comment-like][aria-pressed="true"] { color: #ff527b; }
+.tell-thread { padding: 4px 16px 12px; }
+.tell-thread li[data-comment] { display: grid; grid-template-columns: 32px minmax(0, 1fr) 42px; align-items: start; gap: 10px; margin: 0; padding: 12px 0; white-space: normal; }
+.tell-comment-avatar { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: #272832; color: #dcdaf1; font-size: 13px; font-weight: 700; }
+.tell-comment-copy strong { color: #f5f3ed !important; font-size: 13px; }
+.tell-comment-copy p { margin: 2px 0 0; white-space: pre-wrap; line-height: 1.4; font-size: 14px; }
+.tell-thread button[data-comment-delete] { padding: 0; margin-top: 5px; border: 0; background: none; color: #bfbcc7; font-size: 12px; }
+.tell-thread button[data-comment-like] { display: grid; place-items: center; align-content: center; min-height: 44px; gap: 4px; margin: 0; padding: 0; border: 0; background: none; color: #d3d0da; font-size: 11px; }
+.tell-thread button[data-comment-like] svg { width: 18px; height: 18px; }
+.tells-feed form[data-kind="comment"] { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: end; }
+.tells-feed form[data-kind="comment"] textarea { min-height: 44px; resize: vertical; border-radius: 16px; }
+.tells-feed form[data-kind="comment"] button { min-height: 44px; padding-inline: 8px; border: 0; background: none; color: #aebdff; }
