@@ -44,6 +44,7 @@ async function start(){
          </form>
          <details class="admin-moderation">
            <summary>Moderovať komentáre a lajky</summary>
+           <button type="button" class="admin-danger" data-delete-all-tells disabled>Vymazať všetky príspevky</button>
            <p role="status"></p><div data-moderation-posts></div>
            <button type="button" data-more-tells hidden>Staršie príspevky</button>
          </details>
@@ -85,7 +86,40 @@ async function start(){
  const postList=moderation.querySelector('[data-moderation-posts]')
  const moreTells=moderation.querySelector('[data-more-tells]')
  const moderationStatus=moderation.querySelector('[role=status]')
+ const deleteAll=moderation.querySelector('[data-delete-all-tells]')
  const moderationPage=20
+ let deleting=false
+ async function deletePosts(post){
+   if(deleting)return
+   const message=post?'Vymazať tento príspevok aj s komentármi a lajkami?':'Natrvalo vymazať VŠETKY príspevky Tells vrátane komentárov a lajkov?'
+   if(!confirm(message))return
+   if(!post&&prompt('Na potvrdenie napíš VYMAZAŤ')!=='VYMAZAŤ')return
+   deleting=true
+   deleteAll.disabled=true
+   moderation.setAttribute('aria-busy','true')
+   try{
+     const paths=post
+       ? [(await checked(db.from('unreleased_tells').delete().eq('id',post.id).select('photo_path').single())).photo_path]
+       : await checked(db.rpc('delete_all_tells'))
+     let photoErrors=0
+     for(let offset=0;offset<paths.length;offset+=100){
+       try{await checked(db.storage.from('unreleased-tells').remove(paths.slice(offset,offset+100)))}
+       catch{photoErrors++}
+     }
+     postOffset=0
+     postList.replaceChildren()
+     await listModerationPosts()
+     moderationStatus.textContent=photoErrors
+       ? 'Príspevky sú vymazané. Niektoré fotky sa nepodarilo odstrániť z úložiska.'
+       : 'Počet vymazaných príspevkov: '+paths.length
+   }catch(error){moderationStatus.textContent=error.message}
+   finally{
+     deleting=false
+     deleteAll.disabled=!postOffset
+     moderation.removeAttribute('aria-busy')
+   }
+ }
+ deleteAll.onclick=()=>deletePosts()
  const checked=async query=>{const result=await query;if(result.error)throw result.error;return result.data}
  let postOffset=0
  function node(tag,text){const element=document.createElement(tag);element.textContent=text;return element}
@@ -129,7 +163,11 @@ async function start(){
        const list=node('ul','')
        const more=node('button','Načítať komentáre')
        more.type='button'
-       details.append(summary,list,more)
+       const removePost=node('button','Vymazať príspevok')
+       removePost.type='button'
+       removePost.className='admin-danger'
+       removePost.onclick=()=>deletePosts(post)
+       details.append(summary,removePost,list,more)
        let loaded=false
        details.ontoggle=async()=>{
          if(!details.open||loaded)return
@@ -145,6 +183,7 @@ async function start(){
      }
      postOffset+=Math.min(posts.length,moderationPage)
      moreTells.hidden=posts.length<=moderationPage
+     deleteAll.disabled=deleting||!postOffset
      if(!postOffset)moderationStatus.textContent='Zatiaľ tu nie sú žiadne príspevky.'
    }catch(error){moderationStatus.textContent=error.message;moreTells.hidden=false}
    finally{moreTells.disabled=false}
