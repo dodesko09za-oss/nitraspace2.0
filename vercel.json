@@ -39,6 +39,7 @@
     {"source":"/messages/:path*","destination":"/space.html"},
     {"source":"/account","destination":"/space.html"},
     {"source":"/activity","destination":"/space.html"},
+    {"source":"/admin","destination":"/social.html"},
     {"source":"/admin/:path*","destination":"/space.html"},
     {
       "source": "/chat",

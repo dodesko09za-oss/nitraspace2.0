@@ -4,7 +4,7 @@ import './social.css'
 const app = document.querySelector('#socialApp')
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
-const supabase = SUPABASE_URL && SUPABASE_KEY ? createClient(SUPABASE_URL, SUPABASE_KEY) : null
+let supabase = SUPABASE_URL && SUPABASE_KEY ? createClient(SUPABASE_URL, SUPABASE_KEY) : null
 const WALL_KEY = 'nitra-space-redesign-wall'
 const EVENTS_KEY = 'nitra-space-redesign-events'
 const POLL_VOTER_KEY = 'nitra-space-poll-voter'
@@ -1144,7 +1144,8 @@ document.addEventListener('visibilitychange', () => {
   }
 })
 
-export async function showAdminEvents(stats){
+export async function showAdminEvents(stats,adminClient){
+ if(adminClient)supabase=adminClient
  const {data,error}=await supabase.rpc('is_admin')
  if(error||!data)throw Error('Vyžaduje sa admin účet.')
  state.adminAuthenticated=true
