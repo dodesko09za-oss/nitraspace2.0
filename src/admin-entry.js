@@ -104,17 +104,19 @@ async function start(){
    deleteAll.disabled=true
    moderation.setAttribute('aria-busy','true')
    try{
+     moderationStatus.textContent=post?'Mažem príspevok…':'Mažem všetky príspevky…'
      const paths=post
        ? [(await checked(db.from('unreleased_tells').delete().eq('id',post.id).select('photo_path').single())).photo_path]
        : await checked(db.rpc('delete_all_tells'))
+     postOffset=0
+     postList.replaceChildren()
+     await listModerationPosts()
+     moderationStatus.textContent='Počet vymazaných príspevkov: '+paths.length
      let photoErrors=0
      for(let offset=0;offset<paths.length;offset+=100){
        try{await checked(db.storage.from('unreleased-tells').remove(paths.slice(offset,offset+100)))}
        catch{photoErrors++}
      }
-     postOffset=0
-     postList.replaceChildren()
-     await listModerationPosts()
      moderationStatus.textContent=photoErrors
        ? 'Príspevky sú vymazané. Niektoré fotky sa nepodarilo odstrániť z úložiska.'
        : 'Počet vymazaných príspevkov: '+paths.length
@@ -139,11 +141,11 @@ async function start(){
    confirmDelete.disabled=!post
    deleteDialog.showModal()
  }
- confirmation.oninput=()=>{confirmDelete.disabled=confirmation.value.trim().toLocaleUpperCase('sk-SK')!=='VYMAZAŤ'}
+ confirmation.oninput=()=>{confirmDelete.disabled=!/^vymaza[tť]$/iu.test(confirmation.value.trim())}
  deleteForm.querySelector('[data-cancel-delete]').onclick=()=>deleteDialog.close()
  deleteForm.onsubmit=event=>{
    event.preventDefault()
-   if(confirmDelete.disabled)return
+   if(!selectedPost&&!/^vymaza[tť]$/iu.test(confirmation.value.trim()))return
    deleteDialog.close()
    void deletePosts(selectedPost)
  }
